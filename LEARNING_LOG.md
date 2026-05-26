@@ -130,3 +130,52 @@ just a date column in fact_transactions?
 My answer: To slice and analyze data at any granularity 
 we need — day, week, month, quarter, year — without 
 recalculating those attributes every time we query.
+
+
+## Session 3 — Data Generation Script
+
+### Key Concepts
+
+**Docker Volume**
+What it is: A mechanism, mapping a specific directory on my machine to a directory on the container, so data survives the deletion of the container
+Why it matters: In case of real data, we secure it against the eventual loss of a container
+
+**psycopg2 Connection vs Cursor**
+Connection: The main connection between postgress db and python. We use it to persist data and keep the connection open.
+Cursor: The object that allows query exectuion and data retrival from the postgress db
+Why commit() belongs to connection:  Because it goes beyond the scope of just querying data, where we want the information to be persisted we need to use connection
+
+**Atomicity**
+What it is: The fail-save mechanism that ensures that all part of a transaction have passed, in the other case we call rollback
+Why it matters for our pipeline: For the same reason it matters in all data pipelines, to ensure data integrity
+
+**PEP 8**
+What it is: Python style code
+Key rules we follow: functions, variables follow snake_case. WE always use 4 identations 
+
+**SQL Injection**
+What it is: A way to abuse not smart versions of sql 
+How %s placeholders protect us: It sanitazes inputs so they are never treated as executable commands. 
+
+**cursor.fetchall()**
+What it returns: Provides the whole result set of the last executed query.
+Why we use list comprehension on it: Because it returns a list of tupples, having the values for each column in that row so we unpack it
+
+**Ternary Expression**
+What it is: A short one-line if statement
+Example from our code: random.choice(block_reasons) if is_blocked else None
+
+### Business Logic in fact_transactions
+Fraud rate assumption: 2% of transactions are fraudulent
+Chargeback rate assumption: 60% of fraudulent transactions get disputed
+Fraud loss assumption: between 50-100% of transaction amount is lost
+FX rate assumption: 30% of transactions are cross-currency
+
+### Dependency Order
+Why order matters when populating tables: Because some tables have foreign key dependencies, and in order to be populated, we need to have data to populate them.
+Our load order and why: Our order is exactly tailored to that.
+
+### CFO Question for next session
+What is the first business question a Paynetics CFO 
+would ask about this transaction data?
+My answer: % of fraudulent transactions 
