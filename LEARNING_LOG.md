@@ -179,3 +179,53 @@ Our load order and why: Our order is exactly tailored to that.
 What is the first business question a Paynetics CFO 
 would ask about this transaction data?
 My answer: % of fraudulent transactions 
+
+## Session 4 — SQL Analysis (Query 1)
+
+### Key Concepts
+
+**LEFT JOIN vs INNER JOIN in analytical queries**
+LEFT JOIN: Keeps all rows from the left table, fills NULL for unmatched rows on the right.
+INNER JOIN: Only keeps rows that have a match on both sides.
+Rule to remember: Use INNER JOIN in analytical queries where you only want attributable results. Use LEFT JOIN separately as a data quality check to surface orphaned records.
+
+**Why you never GROUP BY or JOIN on names**
+Names are dirty — duplicates, typos, capitalisation differences can collapse rows silently.
+Always join and group on surrogate keys (merchant_key, customer_key etc.).
+Real example from our data: Two merchants named "Ortega Inc" with different merchant_keys collapsed into one row when we grouped by name — we lost a merchant silently.
+
+**Aliased columns in SELECT**
+SQL evaluates the SELECT list all at once — you cannot reference an alias you defined in the same SELECT.
+Wrong: (interchange_fee - scheme_fee - fraud_loss) AS net_revenue
+Right: (SUM(ft.interchange_fee) - SUM(ft.scheme_fee) - SUM(ft.fraud_loss)) AS net_revenue
+
+**Data integrity checks belong in a separate layer**
+Analytical queries assume clean data and report metrics.
+Data quality checks (orphaned keys, NULL foreign keys) belong in separate queries or dbt tests — not baked into every analytical query.
+We confirmed: 0 orphaned transactions in our dataset.
+
+**GROUP BY without SELECT**
+You can GROUP BY a column without selecting it. But if it's a key that makes rows unique, you should select it anyway — you'll need it for future joins.
+
+**COUNT(*) vs COUNT(column)**
+COUNT(*) counts all rows including NULLs.
+COUNT(ft.transaction_key) is more explicit — makes clear you are counting transactions, not just rows. Better habit.
+
+### Git Commands Learned
+mkdir -p sql/analysis — creates nested folders in one command. -p means parents, creates the full path even if none of it exists yet.
+cd .. — go up one directory
+cd ../.. — go up two directories
+git add sql/ — stage a specific folder instead of everything
+git status — shows staged (green), unstaged (red), and untracked files
+
+### Business Insight from Query 1
+27 out of 100 merchants have negative net revenue.
+This means fraud losses exceed interchange revenue for those merchants.
+In a real fintech this triggers: enhanced monitoring, potential offboarding, or fraud investigation.
+
+### CFO Question — Answered
+First question a Paynetics CFO would ask: what is our net revenue per merchant?
+That is exactly what we built in query 1.
+
+### Query committed
+net_revenue_per_merchant.sql → /sql/analysis/
