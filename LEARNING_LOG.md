@@ -229,3 +229,56 @@ That is exactly what we built in query 1.
 
 ### Query committed
 net_revenue_per_merchant.sql → /sql/analysis/
+
+
+## Session 5 — SQL Analysis (Queries 2 & 3)
+
+### Key Concepts
+
+**SQL Execution Order**
+SQL executes in this order, which affects how you write queries:
+FROM → JOIN → WHERE → GROUP BY → SELECT → ORDER BY
+Write queries in this order too — start with FROM, build outward.
+Why it matters: You cannot reference a SELECT alias in a WHERE clause
+because WHERE runs before SELECT is evaluated.
+
+**Reserved Words as Column Names**
+year and month are reserved words in SQL — Postgres uses them in
+functions like EXTRACT(YEAR FROM date).
+Quoting them with "" tells Postgres they are column names, not keywords.
+Better practice: name columns transaction_year, transaction_month in
+your schema to avoid this entirely. We will fix this in dbt.
+
+**Integer Division**
+Dividing two integers in Postgres truncates the decimal — 21 / 1000 = 0.
+Always cast to decimal when calculating rates or percentages:
+SUM(...)::decimal / COUNT(...)::decimal
+Rule to remember: any time you calculate a rate, cast first.
+
+**COUNT vs SUM for conditional counting**
+COUNT(column) counts all non-NULL values regardless of the value.
+SUM(CASE WHEN condition THEN 1 ELSE 0 END) counts only rows
+where the condition is true.
+Use SUM with CASE when you need to count a subset of rows.
+
+**Identifying fraud without a boolean flag**
+Our fact_transactions table has no is_fraud column — it was used
+in the Python script to calculate fraud_loss but never inserted.
+Lesson: fraud_loss > 0 is our proxy for a fraudulent transaction.
+Broader lesson: always check what columns actually exist in the table
+before assuming the data you need is there.
+
+**Naming conventions**
+Alias columns clearly — fraud_rate_pct not fraud_rate when the
+value is a percentage. Makes output self-documenting.
+File naming: match the project plan description, snake_case,
+no unnecessary words. fraud_rate_by_scheme.sql not
+fraud_percentage_per_scheme_fee.sql.
+
+### Git Commands Learned
+touch filename — creates an empty file via Git Bash
+mv old_name new_name — renames a file (or moves it)
+
+### Queries Committed
+monthly_volume_and_revenue_trends.sql → /sql/analysis/
+fraud_rate_by_scheme.sql → /sql/analysis/
