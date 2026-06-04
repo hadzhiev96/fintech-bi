@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: fintech
+    database: fintech
+    schema: public
+    tables:
+      - name: fact_transactions
+      - name: dim_customer
+      - name: dim_merchant
+      - name: dim_card
+      - name: dim_bank
+      - name: dim_scheme
+      - name: dim_date
