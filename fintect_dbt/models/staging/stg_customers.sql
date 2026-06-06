@@ -1,0 +1,12 @@
+SELECT 
+    customer_key,
+    first_name,
+    last_name,
+    email,
+    telephone,
+    city,
+    country,
+    is_blocked,
+    block_reason
+FROM
+    {{source('fintech','dim_customer')}}

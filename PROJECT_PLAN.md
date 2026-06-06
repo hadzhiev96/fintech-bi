@@ -1,0 +1,201 @@
+# Fintech BI Project — Master Plan
+
+## Status Legend
+✅ Complete
+🔄 In Progress
+⏳ Not Started
+
+---
+
+## Phase 1 — Data Foundation
+Goal: Understand raw data, model it properly in SQL.
+
+### Environment Setup
+✅ Docker Desktop installed and running
+✅ PostgreSQL 15 container running (fintech-db)
+✅ DBeaver connected to fintech database
+✅ Git initialized and connected to GitHub
+✅ VS Code configured with Black formatter
+✅ Python 3.14 installed and PATH configured
+
+### Schema Design
+✅ Star schema designed
+✅ Fact table identified (fact_transactions)
+✅ All dimension tables designed
+✅ schema.md committed to GitHub
+
+### Data Generation
+✅ generate_data.py script created
+✅ All tables created in Postgres
+✅ dim_date populated (730 rows)
+✅ dim_bank populated (20 rows)
+✅ dim_customer populated (500 rows)
+✅ dim_scheme populated (5 rows)
+✅ dim_merchant populated (100 rows)
+✅ dim_card populated (700 rows)
+✅ fact_transactions populated (50,000 rows)
+
+### Analytical SQL
+✅ Net revenue per merchant query
+✅ Monthly transaction volume and revenue trends
+✅ Fraud rate by scheme
+✅ Top 10 merchants by interchange revenue
+✅ Chargeback rate by merchant category
+✅ Period-over-period revenue comparison
+✅ Queries committed to /sql/analysis/ folder on GitHub
+
+---
+
+## Phase 2 — dbt Core
+Goal: Transform raw data into clean, tested, documented models.
+
+### Setup
+⏳ dbt Core installed
+⏳ dbt project initialized
+⏳ dbt connected to Postgres
+⏳ VS Code dbt Power User extension installed
+⏳ GitHub Actions CI configured
+
+### Staging Layer
+⏳ stg_transactions.sql
+⏳ stg_customers.sql
+⏳ stg_merchants.sql
+⏳ stg_cards.sql
+⏳ stg_banks.sql
+⏳ stg_schemes.sql
+⏳ stg_dates.sql
+⏳ All staging models tested and documented
+
+### Intermediate Layer
+⏳ int_transaction_enriched.sql
+⏳ int_merchant_metrics.sql
+⏳ int_card_metrics.sql
+
+### Mart Layer
+⏳ fct_transactions.sql
+⏳ dim_merchant.sql
+⏳ dim_customer.sql
+⏳ dim_card.sql
+⏳ dim_date.sql
+
+### Testing and Documentation
+⏳ Not-null tests on all primary keys
+⏳ Unique tests on all primary keys
+⏳ Accepted values tests on status columns
+⏳ Custom test: interchange_fee > 0
+⏳ dbt docs generated and reviewed
+⏳ DAG reviewed and clean
+
+### Metrics Layer
+⏳ Net revenue per card defined
+⏳ Interchange revenue defined
+⏳ Chargeback rate defined
+⏳ Fraud rate defined
+
+---
+
+## Phase 3 — Power BI (Lite)
+Goal: Build one solid semantic model and executive dashboard.
+
+### Setup
+⏳ Power BI Desktop installed
+⏳ Connected to Postgres via DirectQuery
+⏳ Tabular Editor 3 installed
+⏳ DAX Studio installed
+⏳ PBIP format enabled
+
+### Semantic Model
+⏳ Star schema imported from dbt marts
+⏳ Relationships configured correctly
+⏳ Row-level security implemented (CFO vs merchant view)
+
+### Report Pages
+⏳ Executive KPI page
+    ⏳ Net revenue
+    ⏳ Total interchange
+    ⏳ Fraud rate
+    ⏳ Chargeback rate
+    ⏳ Active cards
+⏳ Merchant analysis page
+    ⏳ Top 10 merchants by revenue
+    ⏳ Revenue by merchant category
+⏳ Risk page
+    ⏳ Fraud by scheme
+    ⏳ Chargeback trend
+
+### DAX Measures
+⏳ Net Revenue = interchange - scheme fees - fraud losses
+⏳ Fraud Rate = fraud transactions / total transactions
+⏳ Chargeback Rate = chargebacks / total transactions
+⏳ MoM Revenue Change
+
+### Version Control
+⏳ Power BI project in PBIP format
+⏳ Committed to GitHub
+
+---
+
+## Phase 4 — DE Infrastructure
+Goal: Add orchestration and cloud warehouse.
+
+### Airflow
+⏳ Airflow installed via Docker
+⏳ DAG built: truncate → generate → dbt run → dbt test
+⏳ Schedule configured (nightly)
+⏳ Failure alerting configured
+⏳ Astronomer Cosmos installed
+
+### Snowflake Migration
+⏳ Snowflake free trial set up
+⏳ Schema migrated to Snowflake
+⏳ dbt pointed at Snowflake
+⏳ Power BI connected to Snowflake
+
+### Data Observability
+⏳ Elementary dbt package installed
+⏳ Freshness monitors configured
+⏳ Volume monitors configured
+⏳ Anomaly detection configured
+⏳ Data quality report generated
+
+### Docker Compose
+⏳ docker-compose.yml created
+⏳ Full stack spins up with one command
+
+---
+
+## Phase 5 — Portfolio Polish
+Goal: Make the project hireable.
+
+### Documentation
+⏳ GitHub README tells the full story
+⏳ Architecture Decision Record written
+⏳ Metric catalog documented
+⏳ Data lineage diagram created
+
+### Presentation
+⏳ Loom walkthrough recorded (10-15 mins)
+⏳ LinkedIn post drafted
+⏳ CV updated with project
+
+---
+
+## Learning Log Status
+✅ Session 1 — Environment setup
+✅ Session 2 — Schema design
+✅ Session 3 — Data generation script
+🔄 Session 4 — Data generation complete (CFO question pending)
+⏳ Sessions 5+ — SQL analysis and beyond
+
+---
+
+## DataCamp Courses
+✅ Understanding Data Engineering
+⏳ Introduction to dbt (start Phase 2)
+⏳ Introduction to Power BI (start Phase 3)
+⏳ Introduction to Airflow (start Phase 4)
+⏳ Introduction to Snowflake (start Phase 4)
+⏳ Associate Data Engineer in SQL (ongoing)
+
+## Coursera
+⏳ DeepLearning.AI Data Engineering Certificate (start after Phase 2)

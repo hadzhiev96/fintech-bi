@@ -1,0 +1,6 @@
+dbt-env/
+logs/
+fintect_dbt/logs/
+fintect_dbt/target/
+fintect_dbt/dbt_packages/
+Courses to take.docx

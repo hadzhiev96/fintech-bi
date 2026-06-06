@@ -1,3 +1,12 @@
+## Session Checklist
+
+### Before every session
+1. Start Docker container: `docker start fintech-db`
+2. Navigate to project folder: `cd /c/Users/hadzh/OneDrive/Desktop/BI\ Project`
+3. Activate virtual environment: `source dbt-env/Scripts/activate`
+4. Navigate to dbt project: `cd fintect_dbt`
+
+
 # Learning Log
 
 ## Session 1 — Environment Setup
@@ -282,3 +291,154 @@ mv old_name new_name — renames a file (or moves it)
 ### Queries Committed
 monthly_volume_and_revenue_trends.sql → /sql/analysis/
 fraud_rate_by_scheme.sql → /sql/analysis/
+
+## Session 6 — SQL Analysis (Queries 4, 5 & 6)
+
+### Key Concepts
+
+**Window Functions**
+Perform calculations across rows related to the current row without
+collapsing them like GROUP BY does.
+Basic syntax: FUNCTION() OVER (PARTITION BY ... ORDER BY ...)
+PARTITION BY: resets the calculation per group, rows stay separate
+ORDER BY: defines the order of rows within the partition
+
+**LAG()**
+Returns the value from the previous row in the defined order.
+LAG(net_revenue) OVER (ORDER BY year, month)
+First row always returns NULL — no previous row exists. This is correct behavior.
+
+**Chaining CTEs**
+When you need to reference a SELECT alias in further calculations,
+wrap it in a second CTE and build on top of it.
+Pattern we used:
+CTE 1 → aggregate base metrics
+CTE 2 → apply window function on aggregated result
+Final SELECT → calculate derived metrics from CTE 2
+This is the same mental model as dbt layers — each step builds on the previous.
+
+**Integer Division Reminder**
+Dividing two integers truncates the decimal in Postgres.
+Always cast to decimal before dividing: value::decimal / total::decimal
+
+**Guarding Against Bad Denominators**
+When calculating percentages, always guard against:
+NULL — no previous value exists
+Zero — division by zero throws an error
+Negative — percentage becomes mathematically misleading
+Pattern: CASE WHEN prev_value IS NULL OR prev_value <= 0 THEN NULL
+ELSE ROUND(... * 100, 2) END
+
+**Boolean Columns in SQL**
+Can filter directly: WHERE is_chargeback = TRUE
+Or shorthand: WHERE is_chargeback
+For conditional aggregation use CASE WHEN is_chargeback = TRUE THEN 1 ELSE 0 END
+
+**Subquery vs CTE for Denominators**
+Wrong: using a subquery SELECT COUNT(*) FROM fact_transactions as denominator
+gives total across all groups, not per group.
+Right: COUNT(ft.transaction_id) in the same GROUP BY context calculates
+per group automatically.
+
+
+### Business Insights
+Top 10 merchants by interchange revenue identified.
+Chargeback rates by merchant category all below 2% — consistent with
+60% of 2% fraud rate from data generation logic.
+MoM revenue swings are volatile due to random fraud distribution in
+synthetic data — noted as known limitation in period-over-period query.
+
+### Queries Committed
+top_10_merchants_by_interchange_revenue.sql → /sql/analysis/
+chargeback_rate_by_merchant_category.sql → /sql/analysis/
+period_over_period_revenue_comparison.sql → /sql/analysis/
+
+### Phase 1 — Complete
+All 6 analytical SQL queries written and committed.
+Star schema designed, data generated, queries cover:
+net revenue, monthly trends, fraud rate, top merchants,
+chargeback rate, and period-over-period comparison.
+Ready for Phase 2 — dbt Core.
+
+
+## Session 7 — dbt Setup and First Staging Model
+
+### Key Concepts
+
+**Virtual Environment**
+An isolated Python installation for a specific project.
+Packages installed inside it don't affect your global Python.
+Uses exactly the Python version you specify.
+Must be activated every new terminal session.
+Why it matters: prevents version conflicts between projects.
+
+**dbt Project Structure**
+models/ — where you write SQL transformations. 90% of your time.
+staging/ — one model per source table, clean and rename only
+intermediate/ — join staging models, apply business logic
+marts/ — final analytical tables, what Power BI connects to
+seeds/ — small CSV reference data loaded directly into the database
+tests/ — custom data quality tests
+macros/ — reusable Jinja/SQL helper functions
+snapshots/ — SCD Type 2 slowly changing dimensions
+logs/ — dbt run logs, don't touch
+
+**Medallion Architecture**
+Three layer approach to data transformation.
+Raw → Staging (bronze) → Intermediate (silver) → Marts (gold)
+Each layer only references the layer directly below it. Never skip layers.
+Staging: clean and rename raw data, no business logic
+Intermediate: join and enrich, apply business logic
+Marts: aggregated, business ready, CFO readable
+
+**sources.yml**
+Declares your raw source tables to dbt.
+dbt reads all yml files automatically — no explicit import needed.
+Tells dbt the database, schema, and table names for raw data.
+Acts as a contract between dbt and your database.
+
+**Jinja and dbt Functions**
+Double curly braces {{ }} are Jinja syntax — tells dbt to execute
+the function and replace it with the result.
+source('source_name', 'table_name') — references a raw source table.
+dbt resolves it to the full path: database.schema.table
+ref('model_name') — references another dbt model. Used in intermediate
+and mart layers. Never hardcode table paths in dbt.
+Both source() and ref() are how dbt builds the lineage graph.
+
+**Materializations**
+Controls how dbt builds a model in your database.
+view — stores only the query, data computed on every query. Default.
+table — physically stores data, computed once at run time.
+incremental — only processes new or changed rows, efficient for large tables.
+ephemeral — not built in database, interpolated as CTE into referencing models.
+Staging and intermediate → view. Marts → table.
+Configured in dbt_project.yml per folder.
+
+**dbt run**
+Compiles SQL models and executes them against your database.
+dbt run --select model_name — runs a specific model only.
+Output format to read: PASS=1 WARN=0 ERROR=0 SKIP=0 TOTAL=1
+
+### Commands Learned
+py "-3.12" -m venv dbt-env — create virtual environment with Python 3.12
+source dbt-env/Scripts/activate — activate virtual environment
+dbt init project_name — initialize a new dbt project
+dbt debug — test dbt connection to database
+dbt run --select model_name — run a specific model
+
+### Progress
+dbt installed and connected to Postgres.
+Project structure created: staging, intermediate, marts folders.
+sources.yml declared all 7 raw tables.
+stg_transactions.sql — first staging model created and
+running as view in dbt_dev schema.
+More precisely — dbt is a Python tool that:
+
+Takes your SQL SELECT statements
+Wraps them in the right CREATE TABLE or CREATE VIEW commands automatically
+Uses ref() and source() to understand dependencies and build in the right order
+Uses YAML files for configuration, testing, and documentation
+Brings software practices to SQL — version control, testing, documentation, modularity
+
+You write only the SELECT. dbt handles everything else.
