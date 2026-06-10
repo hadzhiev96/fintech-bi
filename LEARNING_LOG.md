@@ -442,3 +442,59 @@ Uses YAML files for configuration, testing, and documentation
 Brings software practices to SQL — version control, testing, documentation, modularity
 
 You write only the SELECT. dbt handles everything else.
+
+# Session 8 — Intermediate Layer and ref()
+
+### Key Concepts
+
+**ref()**
+The dbt function for referencing other dbt models (as opposed to source()
+which references raw tables).
+Syntax: {{ ref('model_name') }} — argument is the filename without .sql
+Compiles to the full path where dbt built that model: database.schema.model
+Two reasons to use it:
+1. Portability — never hardcode schema names. If models move (e.g. to
+   Snowflake), ref() resolves to the new location automatically.
+2. Dependency tracking — every ref() call tells dbt "this model depends on
+   that one." dbt uses all ref() calls to build the DAG and determine build
+   order automatically. You never specify order manually.
+Rule: source() appears only in staging. Everywhere above staging, use ref().
+
+**CTE-per-source pattern for multi-join models**
+For a model that joins many tables, structure it with one CTE per source
+using ref(), then a final SELECT that joins the CTEs.
+Keeps each input isolated and readable.
+Same chained-CTE mental model as analytical SQL, now across dbt models.
+
+**Enriched fact table**
+An intermediate model that takes the fact table and joins dimensional
+context onto it (names, categories) so downstream models and analysts
+get descriptive attributes without re-joining.
+Drive from the fact table; join each dimension onto it by its key.
+
+**Chained INNER JOIN row loss**
+With multiple INNER JOINs, a row must match in EVERY joined table to survive.
+Failing even one join drops the row entirely.
+Think of each INNER JOIN as a filter gate stacked in sequence — fail any
+gate and the row is gone, taking its measures with it.
+
+**LEFT JOIN as the fail-safe default for fact tables**
+For a fact-grain model, losing a row means losing its measures (revenue,
+fees, losses) from every downstream aggregation — the worst failure mode
+because it is silent.
+LEFT JOIN (driving from the fact) keeps every transaction regardless of
+dimension matches. Unmatched dimension columns come back NULL.
+A NULL dimension attribute is a visible, debuggable problem.
+A missing transaction is an invisible one.
+Tradeoff: LEFT lets dirty data (NULLs) through, so you need tests
+(not_null, relationships) to catch it. INNER hides dirt by dropping rows,
+which feels clean but is more dangerous.
+LEFT is the correct default posture for a fact table — it fails safe.
+
+**Materialization recap for layers**
+Staging → view. Intermediate → view. Marts → table.
+Configured per folder in dbt_project.yml.
+
+### Commands Used
+dbt run --select model_name — build a single model
+dbt run --select staging — build all models in a folder
