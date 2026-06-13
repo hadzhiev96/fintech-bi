@@ -1,0 +1,10 @@
+SELECT 
+    date_key,
+    transaction_date,
+    transaction_day,
+    transaction_month,
+    transaction_quarter,
+    transaction_year,
+    is_weekend
+FROM
+    {{ref('stg_dates')}}

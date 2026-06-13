@@ -1,0 +1,10 @@
+SELECT 
+    card_key,
+    card_type,
+    card_network,
+    currency,
+    card_status,
+    date_issued,
+    expiry_date
+FROM
+    {{ref('stg_cards')}}
