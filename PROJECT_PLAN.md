@@ -27,7 +27,7 @@ Goal: Understand raw data, model it properly in SQL.
 ### Data Generation
 ✅ generate_data.py script created
 ✅ All tables created in Postgres
-✅ dim_date populated (730 rows)
+✅ dim_date populated (731 rows)
 ✅ dim_bank populated (20 rows)
 ✅ dim_customer populated (500 rows)
 ✅ dim_scheme populated (5 rows)
@@ -44,39 +44,41 @@ Goal: Understand raw data, model it properly in SQL.
 ✅ Period-over-period revenue comparison
 ✅ Queries committed to /sql/analysis/ folder on GitHub
 
+**Phase 1 — Complete**
+
 ---
 
 ## Phase 2 — dbt Core
 Goal: Transform raw data into clean, tested, documented models.
 
 ### Setup
-⏳ dbt Core installed
-⏳ dbt project initialized
-⏳ dbt connected to Postgres
+✅ dbt Core installed (1.8.0, via Python 3.12 virtual environment)
+✅ dbt project initialized (fintect_dbt)
+✅ dbt connected to Postgres
 ⏳ VS Code dbt Power User extension installed
 ⏳ GitHub Actions CI configured
 
 ### Staging Layer
-⏳ stg_transactions.sql
-⏳ stg_customers.sql
-⏳ stg_merchants.sql
-⏳ stg_cards.sql
-⏳ stg_banks.sql
-⏳ stg_schemes.sql
-⏳ stg_dates.sql
+✅ stg_transactions.sql
+✅ stg_customers.sql
+✅ stg_merchants.sql
+✅ stg_cards.sql
+✅ stg_banks.sql
+✅ stg_schemes.sql
+✅ stg_dates.sql
 ⏳ All staging models tested and documented
 
 ### Intermediate Layer
-⏳ int_transaction_enriched.sql
-⏳ int_merchant_metrics.sql
-⏳ int_card_metrics.sql
+✅ int_transactions_enriched.sql
+✅ int_merchant_metrics.sql
+✅ int_card_metrics.sql
 
 ### Mart Layer
-⏳ fct_transactions.sql
-⏳ dim_merchant.sql
-⏳ dim_customer.sql
-⏳ dim_card.sql
-⏳ dim_date.sql
+✅ fct_transactions.sql
+✅ dim_merchant.sql
+✅ dim_customer.sql
+✅ dim_card.sql
+✅ dim_date.sql
 
 ### Testing and Documentation
 ⏳ Not-null tests on all primary keys
@@ -184,18 +186,23 @@ Goal: Make the project hireable.
 ✅ Session 1 — Environment setup
 ✅ Session 2 — Schema design
 ✅ Session 3 — Data generation script
-🔄 Session 4 — Data generation complete (CFO question pending)
-⏳ Sessions 5+ — SQL analysis and beyond
+✅ Session 4 — SQL analysis (Query 1: net revenue per merchant)
+✅ Session 5 — SQL analysis (Queries 2 & 3: monthly trends, fraud rate)
+✅ Session 6 — SQL analysis (Queries 4, 5 & 6) — Phase 1 complete
+✅ Session 7 — dbt setup and first staging model
+✅ Session 8 — Intermediate layer and ref()
+🔄 Session 9 — Mart layer and star schema design
+⏳ Sessions 10+ — Testing, documentation, metrics layer
 
 ---
 
 ## DataCamp Courses
 ✅ Understanding Data Engineering
-⏳ Introduction to dbt (start Phase 2)
+🔄 Introduction to dbt (in progress)
 ⏳ Introduction to Power BI (start Phase 3)
 ⏳ Introduction to Airflow (start Phase 4)
 ⏳ Introduction to Snowflake (start Phase 4)
-⏳ Associate Data Engineer in SQL (ongoing)
+🔄 Associate Data Engineer in SQL (ongoing)
 
 ## Coursera
 ⏳ DeepLearning.AI Data Engineering Certificate (start after Phase 2)

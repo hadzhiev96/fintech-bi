@@ -498,3 +498,84 @@ Configured per folder in dbt_project.yml.
 ### Commands Used
 dbt run --select model_name — build a single model
 dbt run --select staging — build all models in a folder
+
+## Session 9 — Mart Layer and Star Schema Design
+
+### Key Concepts
+
+**Fact vs Dimension — measures vs attributes**
+A measure is a numeric value you aggregate (sum, average) — revenue, fees,
+amounts, counts. Measures belong on the FACT table.
+An attribute is a descriptive property you filter and group BY — name,
+category, status, location. Attributes belong on DIMENSION tables.
+A status flag like is_blocked is an attribute, not a measure — you filter
+by it, you don't sum it.
+Clean fact table = grain key + foreign keys + measures only. No descriptive
+bloat.
+Clean dimension = one row per entity + descriptive attributes only. No measures.
+
+**Why marts materialize as tables (not views)**
+Materialization controls WHEN the work happens.
+View = the query re-runs every time someone queries it (work at read time).
+Table = computed once when dbt runs, then physically stored (work at build time).
+A view-only chain forces the database to walk the entire chain of joins and
+aggregations on every single query.
+Marts are queried constantly by BI tools and users, so you pay the expensive
+computation once at build time and read instantly thereafter.
+Staging and intermediate stay views — only dbt queries them, briefly, while
+building. Marts become tables — the faucet people actually use.
+Nuance: a heavy intermediate model that many marts depend on can also be
+materialized as a table. Materialization is a per-model performance decision,
+not a rigid layer rule.
+
+**Star schema — single-path rule**
+In a star schema, every dimension connects directly to the fact table, and
+dimensions do NOT connect to each other. The fact is the central hub.
+A dimension should not carry foreign keys to other dimensions (e.g. dropping
+bank_key from dim_merchant, customer_key from dim_card), because the fact
+already links to those dimensions directly.
+
+**Ambiguous-path risk**
+If there is more than one route from the fact to a dimension (e.g. a direct
+fact->customer link AND an indirect fact->card->customer link), the BI engine
+cannot tell which path you mean.
+Result: either it refuses with an "ambiguous relationship" error, or it
+silently picks one path and may produce wrong (e.g. double-counted) numbers.
+A clean star guarantees exactly one path from fact to each dimension, so
+aggregations are deterministic.
+Snowflake schema = dimensions linking to other dimensions; avoided here in
+favour of a clean fact-centric star.
+
+**DRY — why centralize joins**
+A join encodes a business rule ("this is how a transaction connects to a
+merchant"). Repeating that join across many models repeats the rule.
+Repeated logic drifts out of sync (one model uses LEFT, another INNER; one
+filters blocked customers, another forgets) and is painful to change.
+Centralizing joins in a foundational model (int_transactions_enriched) gives
+one source of truth: every downstream model is consistent by construction,
+and there is a single place to maintain when logic changes.
+This is the software-engineering principle DRY — Don't Repeat Yourself —
+applied to analytics. Same idea as base classes / inheritance.
+(Performance is a secondary benefit: the join is computed once, not many times.
+Lead with single-source-of-truth and consistency, not performance.)
+
+**dbt as the T in ELT**
+dbt is a transformation tool, not an analysis tool.
+Extract -> Load (raw into warehouse) -> Transform (dbt) -> Analyze (Power BI).
+dbt prepares trustworthy, analysis-ready tables; it does not produce the
+insight itself. This transformation layer is what defines the analytics
+engineer role versus the analyst role.
+
+**Naming conventions across layers**
+Staging mirrors the source — named after the raw tables it lightly cleans.
+Marts use Kimball convention: dimensions named singular (dim_merchant — each
+row IS one merchant), facts named for the business process/event
+(fct_transactions).
+Conventions are not laws; what matters is consistency within a layer and
+following the dominant industry pattern so the repo reads as standard.
+
+### Commands Used
+dbt run --select model_name — build one model
+dbt run --select marts — build all models in the marts folder
+rm path/to/file — delete a file (permanent, no recycle bin — read the path
+  carefully before running)
