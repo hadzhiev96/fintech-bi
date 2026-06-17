@@ -579,3 +579,88 @@ dbt run --select model_name — build one model
 dbt run --select marts — build all models in the marts folder
 rm path/to/file — delete a file (permanent, no recycle bin — read the path
   carefully before running)
+  ### Layer Placement — Endpoint vs Stepping Stone
+
+The layer a model belongs in is decided by its ROLE, not by when you built it.
+
+Intermediate model = a stepping stone. Reusable building block consumed by
+OTHER models, never directly by a BI tool or analyst.
+Example: int_transactions_enriched — nobody reports off it; it exists so other
+models can build on it.
+
+Mart model = an endpoint. A finished, business-ready table consumed DIRECTLY
+by a BI tool or analyst.
+
+The test: "Does anything downstream consume this, or is it an endpoint?"
+- Consumed by another model → intermediate.
+- Read directly by Power BI / an analyst → mart.
+
+A pre-aggregated summary table (one row per merchant with KPIs) is an endpoint,
+so it belongs in the mart layer — even though it is an aggregation built on top
+of an intermediate model. Putting it in intermediate just because of build order
+is a design smell.
+
+Naming: aggregated summary marts use a prefix that signals their nature —
+e.g. agg_ (agg_merchant_metrics) or mart_ (mart_merchant_summary).
+
+### dbt Connection Architecture
+
+The database connection is NOT stored in the project. It lives in:
+  ~/.dbt/profiles.yml
+(~ = home directory; .dbt is a hidden folder, dot-prefix hides it from ls)
+
+Why outside the project: profiles.yml holds credentials (host, port, user,
+password). The project folder is committed to GitHub and shared. Keeping
+credentials in a separate home-directory file keeps secrets out of version
+control.
+
+Two files link by NAME:
+1. dbt_project.yml (in the project) has:  profile: 'project_name'
+2. profiles.yml (in ~/.dbt) has a matching block of the same name, containing
+   type, host, port, user, password, dbname, schema, threads, and a target.
+
+target (e.g. dev) selects which output block is active. You can keep separate
+dev and prod connection blocks under one profile.
+
+Connection flow on a run:
+dbt reads dbt_project.yml → finds profile name → opens ~/.dbt/profiles.yml →
+finds the matching block → reads the active target → connects to the database →
+builds models into the configured schema.
+
+dbt debug tests this entire chain end to end.
+
+### dbt Tests — Overview
+
+Tests turn a set of models into a trustworthy pipeline. Same purpose as unit
+tests in software, but they assert DATA state, not code logic.
+
+Generic tests — reusable, declared in YAML, applied to columns:
+- unique          — no duplicate values
+- not_null        — no NULLs
+- accepted_values — value must be from a defined list (good for status columns)
+- relationships   — every value must exist in another table's column
+                    (guards against orphaned foreign keys: e.g. every
+                    merchant_key in the fact must exist in dim_merchant)
+
+Singular tests — custom SQL queries for one specific check (e.g.
+interchange_fee > 0). Stored as .sql files in the tests/ folder.
+
+Tests are declared in a YAML schema file alongside the models. One per layer
+or one per folder.
+
+### Renaming / Refactoring dbt Models
+
+A dbt model's name IS its filename. Renaming the file renames the model.
+Renaming breaks any other model that referenced the old name via ref().
+
+Workflow for a safe rename/move:
+1. Move + rename the file (mv).
+2. Search for stale references before running:  grep -r "old_name" models/
+   (grep searches text inside files; -r = recursive through subfolders)
+   Empty result = nothing references it, safe to proceed.
+3. Re-run and verify (a model moved into marts/ will now build as a table,
+   per the folder's materialization config).
+4. Clean up orphans: dbt does NOT auto-drop database objects you stop managing.
+   A renamed model leaves its old view/table behind in the schema. Drop stale
+   objects manually (DROP VIEW IF EXISTS schema.name) — dbt has no built-in
+   "delete what I no longer manage" command out of the box.

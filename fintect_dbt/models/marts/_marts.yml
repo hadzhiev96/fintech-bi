@@ -1,0 +1,95 @@
+version: 2
+
+models:
+
+  - name: dim_merchant          # 2 spaces, then "- " for list item
+    columns:                    # 4 spaces (aligns under "name", a sibling key)
+      - name: merchant_key      # 6 spaces, then "- "
+        data_tests:                  # 8 spaces (under "name", sibling key)
+          - unique              # 10 spaces, then "- "
+          - not_null
+
+  - name: fct_transactions
+    columns:
+      - name: transaction_id
+        data_tests:
+          - unique
+          - not_null
+      - name: merchant_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_merchant')
+              field: merchant_key
+      - name: card_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_card')
+              field: card_key
+      - name: customer_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_key
+
+      - name: date_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+
+      - name: bank_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_bank')
+              field: bank_key
+
+      - name: scheme_key
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_scheme')
+              field: scheme_key
+
+  - name: dim_customer
+    columns:
+      - name: customer_key
+        data_tests:
+          - unique
+          - not_null
+
+  - name: dim_card
+    columns:
+      - name: card_key
+        data_tests:
+          - unique
+          - not_null
+      - name: card_status
+        data_tests:
+          - accepted_values:
+              values: ["active", "frozen", "cancelled", "expired"]
+
+  - name: dim_bank          # 2 spaces, then "- " for list item
+    columns:                    # 4 spaces (aligns under "name", a sibling key)
+      - name: bank_key      # 6 spaces, then "- "
+        data_tests:                  # 8 spaces (under "name", sibling key)
+          - unique              # 10 spaces, then "- "
+          - not_null
+
+  - name: dim_scheme          # 2 spaces, then "- " for list item
+    columns:                    # 4 spaces (aligns under "name", a sibling key)
+      - name: scheme_key      # 6 spaces, then "- "
+        data_tests:                  # 8 spaces (under "name", sibling key)
+          - unique              # 10 spaces, then "- "
+          - not_null
+  
+  - name: dim_date
+    columns:
+      - name: date_key
+        data_tests:
+          - unique
+          - not_null
