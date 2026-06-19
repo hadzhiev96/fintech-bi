@@ -1,24 +1,44 @@
-WITH transactions_enriched AS(
+WITH transactions AS (
     SELECT
         card_key,
-        card_type,
         transaction_amount,
         fraud_loss,
-        transaction_id
+        transaction_id,
+        net_revenue
     FROM
-        {{ref('int_transactions_enriched')}}
-    
+        {{ ref('fct_transactions') }}
+
+),
+
+card_info AS (
+    SELECT
+        card_key,
+        card_type
+    FROM
+        {{ ref('dim_card') }}
+),
+
+aggregated AS (
+    SELECT
+        t.card_key,
+        c.card_type,
+        SUM(t.transaction_amount) AS total_transactions_amount,
+        COUNT(t.transaction_id) AS total_transactions_count,
+        SUM(t.fraud_loss) AS total_fraud_loss,
+        SUM(CASE WHEN t.fraud_loss > 0 THEN 1 ELSE 0 END)
+            AS count_of_fraudulent_transactions,
+        SUM(t.net_revenue) AS net_revenue
+
+    FROM
+        transactions AS t
+    INNER JOIN
+        card_info AS c
+        ON t.card_key = c.card_key
+    GROUP BY
+        t.card_key,
+        c.card_type
 )
 
-SELECT
-    card_key,
-    card_type,
-    SUM(transaction_amount) as total_transactions_amount,
-    COUNT(transaction_id) as total_transactions_count,
-    SUM(fraud_loss) as total_fraud_loss,
-    SUM(CASE WHEN fraud_loss > 0 THEN 1 ELSE 0 END) as count_of_fraudulent_transactions
+SELECT *
 FROM
-    transactions_enriched
-GROUP BY
-    card_key,
-    card_type
+    aggregated
