@@ -6,6 +6,11 @@ SELECT
     fx_rate,
     fraud_loss,
     is_chargeback,
+    interchange_fee - scheme_fee - fraud_loss AS net_revenue,
+    CASE
+      WHEN fraud_loss > 0 THEN TRUE
+      ELSE FALSE
+    END AS is_fraud,
     customer_key,
     card_key,
     merchant_key,
