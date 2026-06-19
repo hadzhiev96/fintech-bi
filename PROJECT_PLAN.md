@@ -55,8 +55,9 @@ Goal: Transform raw data into clean, tested, documented models.
 ✅ dbt Core installed (1.8.0, via Python 3.12 virtual environment)
 ✅ dbt project initialized (fintect_dbt)
 ✅ dbt connected to Postgres
+✅ SQLFluff linter configured (postgres dialect, dbt templater)
 ⏳ VS Code dbt Power User extension installed
-⏳ GitHub Actions CI configured
+⏳ GitHub Actions CI configured (lint + dbt tests on push)
 
 ### Staging Layer
 ✅ stg_transactions.sql
@@ -75,15 +76,20 @@ to the mart layer as agg_merchant_metrics and agg_card_metrics — they are
 pre-aggregated summary endpoints, not stepping-stone models.)
 
 ### Mart Layer
-✅ fct_transactions.sql
+✅ fct_transactions.sql (+ net_revenue, is_fraud metric columns)
 ✅ dim_merchant.sql
 ✅ dim_customer.sql
 ✅ dim_card.sql
 ✅ dim_date.sql
 ✅ dim_bank.sql
 ✅ dim_scheme.sql
-✅ agg_merchant_metrics.sql (aggregated merchant summary)
-✅ agg_card_metrics.sql (aggregated card summary)
+✅ agg_merchant_metrics.sql (aggregated merchant summary, sources net_revenue from fct)
+✅ agg_card_metrics.sql (aggregated card summary, sources net_revenue from fct)
+
+### House Style
+✅ Import / logic / final CTE structure on both agg models
+✅ Role-named CTEs (not duplicating referenced model names)
+✅ Both agg models linting clean
 
 ### Testing and Documentation
 ✅ Not-null tests on all primary keys
@@ -96,12 +102,13 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 ⏳ Model and column descriptions (documentation)
 ⏳ dbt docs generated and reviewed
 ⏳ DAG reviewed and clean
+⏳ Lint cleanup across remaining models (staging, fct, dims)
 
 ### Metrics Layer
-⏳ Net revenue per card defined
-⏳ Interchange revenue defined
-⏳ Chargeback rate defined
-⏳ Fraud rate defined
+✅ Net revenue defined once in fct_transactions (sourced by both agg models)
+✅ Interchange revenue defined (interchange_fee, aggregated in agg_merchant_metrics)
+✅ Chargeback rate defined (is_chargeback flag + chargeback_pct in agg_merchant_metrics)
+🔄 Fraud rate (is_fraud flag added to fct; rate % not yet surfaced in an agg model)
 
 ---
 
@@ -202,7 +209,8 @@ Goal: Make the project hireable.
 ✅ Session 8 — Intermediate layer and ref()
 ✅ Session 9 — Mart layer and star schema design (+ mock interview, metrics refactor)
 ✅ Session 10 — dbt testing and completing the star schema (bank & scheme dims)
-⏳ Sessions 11+ — Documentation, metrics layer
+✅ Session 11 — Metrics layer, CTEs & import/logic/final house style, linting (SQLFluff), git recovery
+⏳ Sessions 12+ — Documentation, staging tests
 
 ---
 

@@ -746,3 +746,197 @@ for now, but data_tests: is the current syntax.
 **Test count reflects parsed state**
 dbt only counts tests it has fully parsed. A partially written schema file
 registers fewer tests; completing it registers all of them.
+
+
+# Session 11 — Metrics Layer, CTEs & House Style, Linting, Git Recovery
+
+---
+
+## 1. The Metrics Layer
+
+### The problem it solves
+A business metric like *net revenue* is a **definition**, not just a number. If that
+definition lives in several different queries and models, then changing it (e.g.
+excluding a new fee type) means hunting down and editing every copy. Divergent copies
+drift apart silently. This is the **DRY principle applied to business definitions**,
+not just to SQL joins — the same instinct as extracting a reused calculation into a
+single method rather than copy-pasting it.
+
+### The ideal: define once, reference everywhere
+The conceptual goal is a single authoritative place where a metric's formula lives,
+which any downstream consumer (another model, Power BI, an ad-hoc query) references by
+name instead of re-deriving.
+
+### The dbt Core reality
+dbt's native semantic/metrics layer has changed significantly across versions and is
+limited in dbt Core without additional packages. The **pragmatic portfolio approach**
+is to define each metric **once as a well-named column at the lowest sensible grain** —
+the fact table — so every consumer aggregates the same pre-defined value.
+
+- `net_revenue = interchange_fee - scheme_fee - fraud_loss`, computed once in
+  `fct_transactions` at the transaction grain.
+- Downstream models then `SUM(net_revenue)` rather than re-writing the formula.
+
+### Row-level vs. aggregated metrics
+- **Additive measures** (net revenue, fraud loss) can live as a row-level column and be
+  summed at any grain.
+- **Rates** (fraud rate, chargeback rate) are *counts divided by totals* — they only
+  exist after aggregation. At the row grain you store the **boolean ingredients**
+  (`is_chargeback`, `is_fraud`) and compute the rate when you aggregate.
+- `is_fraud` is derived as `CASE WHEN fraud_loss > 0 THEN TRUE ELSE FALSE END`, kept as
+  a clean flag consistent with `is_chargeback`.
+
+### Endpoint models and descriptive attributes
+When an aggregate model is an **endpoint** (consumed directly, not a stepping stone),
+it should carry its descriptive names (`merchant_name`, `card_type`) so consumers don't
+have to join back to a dimension. Because a clean fact table holds only **keys and
+measures**, those descriptive attributes must be **joined in from the dimension** inside
+the aggregate model — fact for the numbers, dimension for the names.
+
+---
+
+## 2. CTEs and the Import / Logic / Final House Style
+
+### Why CTEs (independent of dbt)
+1. **Readability** — name each transformation stage and read top-to-bottom instead of
+   decoding nested subqueries inside-out.
+2. **Avoiding repetition** — define an intermediate result once, reference it by name.
+   (Note: most warehouses still re-execute each reference under the hood — the benefit
+   is code clarity, not query speed.)
+3. **Debuggability** — temporarily change the final `SELECT` to read from an
+   intermediate CTE to inspect exactly what that stage produced.
+
+CTEs are **not** a performance feature. In Postgres and most warehouses they don't make
+queries faster; older Postgres versions even treated them as optimization fences. You
+use them for *human* reasons.
+
+### The dbt house style: import / logic / final
+Every model follows the same shape so any file is instantly navigable:
+
+- **Import CTEs** (top) — one per `ref()` / `source()`, doing nothing but pulling in an
+  upstream model. Kept pure: one ref, no logic.
+- **Logic CTEs** (middle) — the actual joins and transformations.
+- **Final SELECT** (bottom) — the model's output, typically `SELECT * FROM <last_cte>`.
+
+### Naming convention
+Name a CTE for its **role**, not by duplicating the model it reads from. A CTE that
+selects from `fct_transactions` is named `transactions` / `base` / `source`, never
+`fct_transactions` — duplicating the name creates ambiguity between the CTE and the
+underlying model in the `FROM` clause.
+
+### The CTE comma rule
+In a `WITH` chain, **every CTE gets a comma after its closing `)` except the last one
+before the final SELECT**. The two failure modes are mirror images:
+- missing comma after a middle CTE, and
+- a stray trailing comma after the last CTE.
+
+### Alias qualification in joins
+Inside a join, **always qualify columns with their table alias** (`SUM(t.net_revenue)`,
+not `SUM(net_revenue)`). A bare reference works only while the name is unique; if a
+joined table later gains a same-named column the reference becomes ambiguous and errors.
+
+---
+
+## 3. Linting and SQLFluff
+
+### What linting is
+**Linting** is automated checking of code against rules *without running it*. The name
+comes from an old Unix `lint` tool (picking "fluff" off code — hence SQL**Fluff**).
+Two categories of finding:
+- **Style** — works but inconsistent (mixed keyword casing, indentation, trailing
+  whitespace). Cosmetic, but consistency is what reads as professional.
+- **Correctness / safety** — risky or ambiguous patterns (ambiguous joins, implicit
+  column lists). The more valuable catches.
+
+### Linter vs. formatter
+- A **formatter** (e.g. Black for Python) silently rewrites code into one style.
+- A **linter** can both *report* problems (`lint` mode) and *fix* them (`fix` mode).
+  The reporting mode teaches the conventions by naming them, rather than fixing silently.
+
+### SQLFluff modes
+- `sqlfluff lint <path>` — read-only; reports violations, touches nothing.
+- `sqlfluff fix <path>` — rewrites the file to resolve fixable violations.
+  Always re-open the file and eyeball what `fix` changed — never trust an auto-fixer
+  blindly. (`fix` only touches formatting, so model logic is unchanged.)
+
+### Rule families seen
+- **LT (layout)** — `LT01` spacing, `LT02` indentation, `LT05` long lines,
+  `LT09` select-target placement, `LT12` trailing newline.
+- **CP (capitalisation)** — `CP01` keyword casing, `CP03` function-name casing. The
+  point is *consistency*: pick one case and apply it everywhere (default: uppercase).
+- **JJ (Jinja)** — `JJ01` padding: braces should "breathe" —
+  `{{ ref('x') }}`, not `{{ref('x')}}`.
+
+### Config and the working-directory lesson
+SQLFluff needs a `.sqlfluff` config declaring the **dialect** (`postgres`) and
+**templater** (`dbt`). The dbt templater compiles Jinja *through dbt* so `ref()` /
+`source()` resolve to real SQL before linting; it requires the `sqlfluff-templater-dbt`
+bridge package.
+
+**Command-line tools resolve their config relative to the current working directory,
+not relative to the file being operated on.** SQLFluff specifically refuses to honor
+the `templater = dbt` setting unless `.sqlfluff` is in the *current working directory*
+(not a subdirectory). dbt behaves the same way — it self-locates by searching the
+current directory for `dbt_project.yml`. The unifying habit: **run both dbt and
+sqlfluff from inside the dbt project root**, where each finds its config automatically.
+
+### Build with tests in one step
+`dbt build --select <model>` runs the model **and** its tests together in DAG order —
+the production-style alternative to running `dbt run` then `dbt test` separately.
+
+---
+
+## 4. Git: Rewriting and Recovering History
+
+### `git commit --amend`
+Replaces the **most recent** commit rather than adding a new one; the old commit is
+discarded and a new one with a **different hash** takes its place.
+- `--amend -m "..."` — replace the message.
+- `--amend --no-edit` — fold newly-staged changes into the last commit, keep the message.
+
+**The amend gotcha:** `--amend` absorbs *whatever is currently staged*. If an unrelated
+file is staged, it silently joins the commit. Always check `git status` before amending.
+
+### Inspecting a commit
+`git show --stat HEAD` — shows the files and per-file insertion/deletion counts of the
+latest commit without the full diff. Use it to verify exactly what a commit contains.
+
+### `git reset` modes
+Moves `HEAD` back (`HEAD~1` = one commit before HEAD), un-committing — but the mode
+determines what happens to the file changes:
+- `--soft` — keeps changes **staged**.
+- `--mixed` (default) — keeps changes in the working dir, **unstaged**.
+- `--hard` — **permanently discards** the changes on disk. Destructive.
+
+To **re-split** a bad bundled commit into separate commits, use `--mixed`: it unstages
+everything so you can `git add` each file individually. **Never** use `--hard` here — it
+would wipe the very edits you want to re-commit.
+
+### Force-push: when and how
+- A **normal push** appends new commits onto history the remote already shares
+  (a fast-forward) — accepted without force.
+- A **force push** is needed only when you've **rewritten** commits the remote already
+  has, causing the histories to **diverge**. The remote rejects a normal push to avoid
+  silently overwriting work.
+- Prefer `git push --force-with-lease` over `--force`. `--force-with-lease` aborts if
+  the remote moved since you last saw it (protecting someone else's pushed work);
+  raw `--force` overwrites unconditionally.
+
+**Rule of thumb:** rewriting history that exists *only locally* is cheap and safe;
+rewriting history *already pushed* requires a force-push and is only safe when no one
+else has pulled it.
+
+### Commit hygiene principles
+- **One coherent change per commit** — if the message needs "and" to join two unrelated
+  actions, it's probably two commits.
+- **Prefix must match the verb:** `feat:` adds, `refactor:` restructures, `fix:` repairs,
+  `chore:` handles tooling/config, `docs:` handles documentation.
+- **Present-tense imperative** — "add", "source", "update" (not past tense).
+- **Specific over vague**, and **full names over shorthand** in messages (greppable,
+  unambiguous in a permanent record).
+- **Order commits by dependency** — commit the thing others build on first.
+- Parallel changes to parallel models should use **parallel message phrasing**.
+
+### Harmless Windows note
+`warning: LF will be replaced by CRLF` is Git normalizing Unix vs. Windows line endings.
+Cosmetic, not an error; configurable via `.gitattributes` if desired.
