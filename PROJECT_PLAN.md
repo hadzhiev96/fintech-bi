@@ -70,8 +70,9 @@ Goal: Transform raw data into clean, tested, documented models.
 
 ### Intermediate Layer
 ✅ int_transactions_enriched.sql
-✅ int_merchant_metrics.sql
-✅ int_card_metrics.sql
+(Note: int_merchant_metrics and int_card_metrics were refactored and promoted
+to the mart layer as agg_merchant_metrics and agg_card_metrics — they are
+pre-aggregated summary endpoints, not stepping-stone models.)
 
 ### Mart Layer
 ✅ fct_transactions.sql
@@ -79,12 +80,20 @@ Goal: Transform raw data into clean, tested, documented models.
 ✅ dim_customer.sql
 ✅ dim_card.sql
 ✅ dim_date.sql
+✅ dim_bank.sql
+✅ dim_scheme.sql
+✅ agg_merchant_metrics.sql (aggregated merchant summary)
+✅ agg_card_metrics.sql (aggregated card summary)
 
 ### Testing and Documentation
-⏳ Not-null tests on all primary keys
-⏳ Unique tests on all primary keys
-⏳ Accepted values tests on status columns
-⏳ Custom test: interchange_fee > 0
+✅ Not-null tests on all primary keys
+✅ Unique tests on all primary keys
+✅ Accepted values tests on status columns (dim_card.card_status)
+✅ Relationships tests on all fact foreign keys (orphaned-key guards)
+✅ Full mart test suite passing (27 tests)
+⏳ Custom singular test: interchange_fee > 0
+⏳ Staging layer tests
+⏳ Model and column descriptions (documentation)
 ⏳ dbt docs generated and reviewed
 ⏳ DAG reviewed and clean
 
@@ -191,8 +200,9 @@ Goal: Make the project hireable.
 ✅ Session 6 — SQL analysis (Queries 4, 5 & 6) — Phase 1 complete
 ✅ Session 7 — dbt setup and first staging model
 ✅ Session 8 — Intermediate layer and ref()
-🔄 Session 9 — Mart layer and star schema design
-⏳ Sessions 10+ — Testing, documentation, metrics layer
+✅ Session 9 — Mart layer and star schema design (+ mock interview, metrics refactor)
+✅ Session 10 — dbt testing and completing the star schema (bank & scheme dims)
+⏳ Sessions 11+ — Documentation, metrics layer
 
 ---
 

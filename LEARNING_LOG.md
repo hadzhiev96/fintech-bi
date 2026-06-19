@@ -664,3 +664,85 @@ Workflow for a safe rename/move:
    A renamed model leaves its old view/table behind in the schema. Drop stale
    objects manually (DROP VIEW IF EXISTS schema.name) — dbt has no built-in
    "delete what I no longer manage" command out of the box.
+
+
+## Session 10 — dbt Testing and Completing the Star Schema
+
+### Key Concepts
+
+**Why tests matter**
+Tests turn a collection of models into a trustworthy pipeline. Same purpose as
+unit tests in software, but they assert DATA state, not code logic.
+They codify checks you would otherwise run by hand (e.g. hunting for duplicate
+keys or orphaned foreign keys) so they run automatically on every build.
+A test only protects you if the test itself is correct — a wrong test (e.g.
+pointing at the wrong field) gives false confidence.
+
+**Two kinds of tests**
+Generic tests — reusable, declared in YAML, applied to columns.
+Singular tests — custom SQL queries for one specific check, stored as .sql
+files in the tests/ folder (e.g. interchange_fee > 0).
+
+**The four built-in generic tests**
+unique          — no duplicate values in a column.
+not_null        — no NULLs.
+accepted_values — value must come from a defined list. Only meaningful on
+                  columns the database does NOT already constrain (e.g. a
+                  varchar status column). Redundant on a true boolean, because
+                  the column type already guarantees true/false.
+relationships   — every value in a column must exist in another table's column.
+                  Guards foreign keys against orphans (e.g. every merchant_key
+                  in the fact must exist in dim_merchant).
+
+**Test plan for a star schema**
+Every dimension primary key: unique + not_null.
+Every fact foreign key: not_null + relationships (to its dimension's key).
+Status/category columns with a fixed value set: accepted_values.
+not_null on a foreign key is a business decision — it asserts "this link is
+always present." Only apply it where that is genuinely required.
+
+**Layer placement — endpoint vs stepping stone (revisited)**
+Completing the test suite surfaced a gap: the fact referenced bank_key and
+scheme_key, but no dim_bank / dim_scheme existed in the mart layer.
+Writing tests forces every foreign key to have a dimension to point at, which
+is why testing exposes incomplete star schemas.
+
+**relationships tests should stay within the layer**
+A relationships test can technically point at any model, including staging.
+But a mart fact should relate to mart dimensions, not reach back into staging.
+Keeping references within the curated layer preserves clean layer separation
+and matches how a BI tool will later build its star schema.
+Principle: a mart fact relates to mart dimensions; do not reach back down a layer.
+
+**Dimension attribute vs reference data**
+A numeric value like interchange_rate is borderline. If the computed result
+(interchange_fee) already lives on the fact, the rate in the dimension is
+reference data you may not use. Keep a column only if it will be filtered,
+grouped, or displayed; otherwise drop it to keep the dimension lean.
+Make the inclusion decision consciously, not by reflex.
+
+**run vs test vs build**
+dbt run   — builds models (views/tables). Does NOT execute tests.
+dbt test  — executes the declared tests. Does NOT build models.
+dbt build — runs and tests in dependency order in one pass (build a model,
+            test it, then proceed). The common everyday command.
+dbt run --select marts runs only that folder; dbt test --select marts tests
+only that folder.
+
+**YAML schema file**
+Tests are declared in a schema YAML alongside the models (e.g. _marts.yml;
+leading underscore sorts it to the top of the folder).
+Structure: models is a list; each model has columns; each column has tests.
+A simple test is just its name (- unique). A test with arguments is a key with
+nested parameters (- relationships: then indented to:/field:).
+YAML is whitespace-sensitive: spaces not tabs, 2 spaces per level, "- " for
+list items, "key: value" with a space after the colon. Arguments of a test
+indent PAST the dash of the test name.
+
+**Deprecation note**
+In dbt 1.8 the YAML key `tests:` is being renamed to `data_tests:`. Both work
+for now, but data_tests: is the current syntax.
+
+**Test count reflects parsed state**
+dbt only counts tests it has fully parsed. A partially written schema file
+registers fewer tests; completing it registers all of them.
