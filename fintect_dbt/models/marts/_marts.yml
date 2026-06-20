@@ -1,33 +1,39 @@
 version: 2
 
 models:
-
-  - name: dim_merchant          # 2 spaces, then "- " for list item
-    columns:                    # 4 spaces (aligns under "name", a sibling key)
-      - name: merchant_key      # 6 spaces, then "- "
-        data_tests:                  # 8 spaces (under "name", sibling key)
-          - unique              # 10 spaces, then "- "
+  - name: dim_merchant
+    description: "One row per merchant. Merchant dimension"          
+    columns:                   
+      - name: merchant_key
+        description: "Surrogate primary key of the merchant dimension"      
+        data_tests:                  
+          - unique             
           - not_null
 
   - name: fct_transactions
+    description: "One row per transaction. Transaction fact table"
     columns:
       - name: transaction_id
+        description: "Unique identifier for each individual transaction"
         data_tests:
           - unique
           - not_null
       - name: merchant_key
+        description: "Surrogate foreign key linking to the merchant dimension"
         data_tests:
           - not_null
           - relationships:
               to: ref('dim_merchant')
               field: merchant_key
       - name: card_key
+        description: "Surrogate foreign key linking to the card dimension"
         data_tests:
           - not_null
           - relationships:
               to: ref('dim_card')
               field: card_key
       - name: customer_key
+        description: "Surrogate foreign key linking to the customer dimension"
         data_tests:
           - not_null
           - relationships:
@@ -35,6 +41,7 @@ models:
               field: customer_key
 
       - name: date_key
+        description: "Surrogate foreign key linking to the date dimension"
         data_tests:
           - not_null
           - relationships:
@@ -42,6 +49,7 @@ models:
               field: date_key
 
       - name: bank_key
+        description: "Surrogate foreign key linking to the bank dimension"
         data_tests:
           - not_null
           - relationships:
@@ -49,6 +57,7 @@ models:
               field: bank_key
 
       - name: scheme_key
+        description: "Surrogate foreign key linking to the card scheme dimension"
         data_tests:
           - not_null
           - relationships:
@@ -56,40 +65,51 @@ models:
               field: scheme_key
 
   - name: dim_customer
+    description: "One row per customer. Customer dimension"
     columns:
       - name: customer_key
+        description: "Surrogate primary key of the customer dimension"
         data_tests:
           - unique
           - not_null
 
   - name: dim_card
+    description: "One row per payment card. Card dimension"
     columns:
       - name: card_key
+        description: "Surrogate primary key of the card dimension"
         data_tests:
           - unique
           - not_null
       - name: card_status
+        description: "Current operational status of the card"
         data_tests:
           - accepted_values:
               values: ["active", "frozen", "cancelled", "expired"]
 
-  - name: dim_bank          # 2 spaces, then "- " for list item
-    columns:                    # 4 spaces (aligns under "name", a sibling key)
-      - name: bank_key      # 6 spaces, then "- "
-        data_tests:                  # 8 spaces (under "name", sibling key)
-          - unique              # 10 spaces, then "- "
+  - name: dim_bank          
+    description: "One row per bank or financial institution. Bank dimension"
+    columns:                    
+      - name: bank_key      
+        description: "Surrogate primary key of the bank dimension"
+        data_tests:                  
+          - unique              
           - not_null
 
-  - name: dim_scheme          # 2 spaces, then "- " for list item
-    columns:                    # 4 spaces (aligns under "name", a sibling key)
-      - name: scheme_key      # 6 spaces, then "- "
-        data_tests:                  # 8 spaces (under "name", sibling key)
-          - unique              # 10 spaces, then "- "
+  - name: dim_scheme         
+    description: "One row per card scheme (e.g., Visa, Mastercard). Scheme dimension"
+    columns:                    
+      - name: scheme_key      
+        description: "Surrogate primary key of the scheme dimension"
+        data_tests:                  
+          - unique              
           - not_null
   
   - name: dim_date
+    description: "One row per calendar date. Date dimension"
     columns:
       - name: date_key
+        description: "Surrogate primary key of the date dimension"
         data_tests:
           - unique
           - not_null
