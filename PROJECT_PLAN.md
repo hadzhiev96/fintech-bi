@@ -97,11 +97,11 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 ✅ Accepted values tests on status columns (dim_card.card_status)
 ✅ Relationships tests on all fact foreign keys (orphaned-key guards)
 ✅ Full mart test suite passing (27 tests)
+✅ Model and column descriptions (marts: grain-first, surrogate-key vocabulary in _marts.yml)
+✅ dbt docs generated and reviewed (docs site renders, descriptions surface)
+✅ DAG reviewed and clean (refactor wiring confirmed; leaf dims understood as BI endpoints)
 ⏳ Custom singular test: interchange_fee > 0
-⏳ Staging layer tests
-⏳ Model and column descriptions (documentation)
-⏳ dbt docs generated and reviewed
-⏳ DAG reviewed and clean
+⏳ Staging layer tests and descriptions
 ⏳ Lint cleanup across remaining models (staging, fct, dims)
 
 ### Metrics Layer
@@ -116,7 +116,7 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 Goal: Build one solid semantic model and executive dashboard.
 
 ### Setup
-⏳ Power BI Desktop installed
+🔄 Power BI Desktop installed
 ⏳ Connected to Postgres via DirectQuery
 ⏳ Tabular Editor 3 installed
 ⏳ DAX Studio installed
@@ -189,7 +189,7 @@ Goal: Make the project hireable.
 ⏳ GitHub README tells the full story
 ⏳ Architecture Decision Record written
 ⏳ Metric catalog documented
-⏳ Data lineage diagram created
+⏳ Data lineage diagram created (lineage graph screenshot captured — ready to embed)
 
 ### Presentation
 ⏳ Loom walkthrough recorded (10-15 mins)
@@ -210,7 +210,8 @@ Goal: Make the project hireable.
 ✅ Session 9 — Mart layer and star schema design (+ mock interview, metrics refactor)
 ✅ Session 10 — dbt testing and completing the star schema (bank & scheme dims)
 ✅ Session 11 — Metrics layer, CTEs & import/logic/final house style, linting (SQLFluff), git recovery
-⏳ Sessions 12+ — Documentation, staging tests
+✅ Session 12 — Documentation (model/column descriptions, dbt docs site, lineage review)
+⏳ Sessions 13+ — Power BI foundations; staging tests & lint cleanup (deferred)
 
 ---
 

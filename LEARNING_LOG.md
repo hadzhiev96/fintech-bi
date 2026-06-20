@@ -940,3 +940,134 @@ else has pulled it.
 ### Harmless Windows note
 `warning: LF will be replaced by CRLF` is Git normalizing Unix vs. Windows line endings.
 Cosmetic, not an error; configurable via `.gitattributes` if desired.
+
+# Session 12 — Documentation, Dimensional Modeling Vocabulary, Lineage
+
+---
+
+## 1. dbt Documentation
+
+### Where descriptions live
+Model and column descriptions live in the **YAML schema files** (e.g. `_marts.yml`) —
+the same files that hold tests. Documentation is not separate infrastructure; it is
+`description:` keys added alongside existing config.
+
+### Placement (YAML is whitespace-sensitive)
+- A **model description** is a sibling of `name:` and `columns:` at the model level.
+- A **column description** is a sibling of `name:` and `data_tests:` at the column level.
+
+```yaml
+  - name: dim_merchant
+    description: "One row per merchant. Merchant dimension"
+    columns:
+      - name: merchant_key
+        description: "Surrogate primary key of the merchant dimension"
+        data_tests:
+          - unique
+          - not_null
+```
+
+### Schema file placement and naming
+Schema YAML files are discovered anywhere under `models/`, but the convention is to
+**co-locate one schema file per layer** with the models it documents
+(`models/marts/_marts.yml`, `models/staging/_staging.yml`). The leading underscore
+sorts the file to the top of the folder and signals "config, not a model."
+
+### What to write
+- **Model description** — state the **grain first** ("one row per X"), then purpose.
+  The grain is the single most useful fact a model description can carry.
+- **Column description** — the column's **business meaning and role**, not a restatement
+  of its name. "Surrogate foreign key linking to the merchant dimension," not "the
+  merchant key."
+- Make load-bearing facts **explicit** rather than relying on the reader to infer them.
+  "The code/tests imply it" puts the burden on the reader; documentation exists to
+  remove that burden. (But don't document the trivially obvious — restating the column
+  name adds nothing.)
+
+---
+
+## 2. Dimensional Modeling Vocabulary (precision matters)
+
+### Grain
+The **grain** of a model is what a single row represents ("one row per transaction",
+"one row per merchant"). Defining grain first disambiguates everything else.
+
+### Surrogate key vs. natural key
+- A **surrogate key** is a system-generated, meaningless integer that uniquely
+  identifies a dimension row. It has no business meaning; it exists purely as a stable,
+  compact join key.
+- A **natural key** (business key) is a real-world identifier (tax ID, card PAN, email).
+- Surrogate-vs-natural is an **independent axis** from primary/unique. A natural key can
+  also be a tested, unique primary key — so `unique` + `not_null` does **not** imply a
+  key is surrogate. The distinction must be stated, not inferred.
+- Joining on the **surrogate key** rather than a natural attribute (e.g. a name) is what
+  prevents distinct rows that share a name from collapsing together.
+
+### Surrogate foreign keys in the fact
+A fact table relates to dimensions through their **surrogate keys**. Each foreign key
+value in the fact is therefore a surrogate-key value — "surrogate foreign key" is the
+precise description, and it signals that the star schema joins fact-to-dimension via
+surrogates, not natural keys.
+
+### Conformed dimension (use only when earned)
+A **conformed dimension** is a dimension **shared across multiple fact tables / data
+marts** with identical meaning and content in each (e.g. one `dim_date` used by both a
+sales fact and an inventory fact, so the two can be compared along the same axis).
+With a **single fact table**, no dimension is "conformed" — there is nothing to conform
+across. Using the term prematurely claims an architectural property the model lacks, and
+an interviewer will ask "conformed across what?". Precise vocabulary is a strength only
+when accurate.
+
+---
+
+## 3. The dbt Docs Site
+
+### Generating
+`dbt docs generate` compiles the project and produces two artifacts in `target/`:
+- **manifest.json** — the lineage metadata (built from `ref()` / `source()` calls).
+- **catalog.json** — real table/column metadata, obtained by **querying the warehouse**.
+
+Because it queries the warehouse, the database must be up and models must already be
+built. It bundles these artifacts with the YAML descriptions into a static site.
+
+### Serving
+`dbt docs serve` starts a local web server (default `http://localhost:8080`) that
+renders the artifacts as a navigable site: model pages, column detail, tests, and the
+interactive **lineage graph (DAG)**. The command **holds the terminal** until stopped
+with `Ctrl+C`. Use `--port <n>` if the default port is busy.
+
+---
+
+## 4. Lineage / The DAG
+
+### What it shows
+The lineage graph visualizes **dbt-to-dbt dependencies only**, derived automatically
+from `ref()` / `source()`. It reads left-to-right through the medallion layers:
+sources → staging → intermediate → marts. It is both a portfolio artifact and a
+**correctness check** — misweired or disconnected models are obvious visually in a way
+reading SQL is not.
+
+### Leaf dimensions are endpoints, not dead models
+A dimension with **nothing downstream of it in the dbt graph** is not unused. Its
+consumer is the **BI layer** (Power BI), which dbt cannot see. The fact-to-dimension
+joins for slicing metrics happen in the semantic model, not in dbt. A leaf dimension is
+an **endpoint**, the same way an aggregated summary model is an endpoint.
+
+---
+
+## 5. Source vs. Derived Artifacts in Version Control
+
+**Only source belongs in version control; derived/build artifacts do not.**
+- dbt's `target/` (manifest, catalog, compiled SQL) is **regenerated** by every
+  `dbt run` / `dbt docs generate` — it is derived, not source. It belongs in
+  `.gitignore` (dbt's default).
+- Same principle as never committing a compiled `target/` / `build/` of `.class` files
+  in Java: commit the source, let consumers regenerate the build output.
+- Committing derived artifacts causes unreviewed machine-generated diffs, instant
+  staleness, and repo bloat.
+
+### Making docs visible without committing artifacts
+Wanting an interviewer to see the docs is a separate concern from committing build
+output. Surface the **output** without versioning the **artifacts**:
+- **GitHub Pages** — host the generated docs site and link it from the README.
+- **A screenshot** of the lineage graph embedded in the README.
