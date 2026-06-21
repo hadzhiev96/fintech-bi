@@ -77,7 +77,7 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 
 ### Mart Layer
 ✅ fct_transactions.sql (+ net_revenue, is_fraud metric columns)
-✅ dim_merchant.sql
+✅ dim_merchant.sql (retains bank_key; merchant→bank relationship left inactive in BI)
 ✅ dim_customer.sql
 ✅ dim_card.sql
 ✅ dim_date.sql
@@ -116,15 +116,16 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 Goal: Build one solid semantic model and executive dashboard.
 
 ### Setup
-🔄 Power BI Desktop installed
-⏳ Connected to Postgres via DirectQuery
+✅ Power BI Desktop installed
+✅ Connected to Postgres in Import mode (chose Import over DirectQuery — static data, full DAX surface)
 ⏳ Tabular Editor 3 installed
 ⏳ DAX Studio installed
 ⏳ PBIP format enabled
 
 ### Semantic Model
-⏳ Star schema imported from dbt marts
-⏳ Relationships configured correctly
+✅ Star schema imported from dbt marts (7 tables from dbt_dev: fct + 6 dims)
+✅ Relationships configured correctly (6x one-to-many dim→fact, single cross-filter direction)
+✅ Removed ambiguous dim_bank→dim_merchant auto-detected relationship
 ⏳ Row-level security implemented (CFO vs merchant view)
 
 ### Report Pages
@@ -211,14 +212,15 @@ Goal: Make the project hireable.
 ✅ Session 10 — dbt testing and completing the star schema (bank & scheme dims)
 ✅ Session 11 — Metrics layer, CTEs & import/logic/final house style, linting (SQLFluff), git recovery
 ✅ Session 12 — Documentation (model/column descriptions, dbt docs site, lineage review)
-⏳ Sessions 13+ — Power BI foundations; staging tests & lint cleanup (deferred)
+✅ Session 13 — Power BI: Import vs DirectQuery, atomic grain, semantic model & relationships
+⏳ Sessions 14+ — DAX measures (start net revenue); staging tests & lint cleanup (deferred)
 
 ---
 
 ## DataCamp Courses
 ✅ Understanding Data Engineering
 🔄 Introduction to dbt (in progress)
-⏳ Introduction to Power BI (start Phase 3)
+🔄 Introduction to Power BI (Phase 3 in progress)
 ⏳ Introduction to Airflow (start Phase 4)
 ⏳ Introduction to Snowflake (start Phase 4)
 🔄 Associate Data Engineer in SQL (ongoing)

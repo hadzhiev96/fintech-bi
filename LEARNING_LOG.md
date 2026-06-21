@@ -1071,3 +1071,118 @@ Wanting an interviewer to see the docs is a separate concern from committing bui
 output. Surface the **output** without versioning the **artifacts**:
 - **GitHub Pages** — host the generated docs site and link it from the README.
 - **A screenshot** of the lineage graph embedded in the README.
+
+# Session 13 — Power BI: Connection Modes, Atomic Grain, and the Semantic Model
+
+---
+
+## 1. Connection Modes: Import vs. DirectQuery
+
+When connecting Power BI to a database, it asks how to consume the data.
+
+- **Import mode** — Power BI pulls a *copy* of the data into its in-memory columnar
+  engine (VertiPaq). Queries run against that local copy. Fast, full DAX feature
+  support, but the data is a **snapshot** — only as fresh as the last refresh.
+- **DirectQuery mode** — data stays in the source; Power BI sends live queries on every
+  interaction. Always current, no copy, but slower and **restricts** parts of the DAX
+  surface (notably some time-intelligence and CALCULATE patterns).
+
+### When to choose which
+- **Import** is the default for analytical models: faster, full DAX, scheduled refresh.
+  Correct for static / synthetic data and for *learning DAX* (no feature restrictions).
+- **DirectQuery** is for genuine real-time needs or datasets too large to fit in memory
+  (often paired with pre-aggregated tables for performance).
+
+Most production analytical models are Import with periodic refresh, not live-connected.
+
+---
+
+## 2. Import the Atomic Fact, Not the Pre-Aggregated Tables
+
+A BI semantic model should be built on the **atomic fact** (`fct_transactions`, one row
+per transaction), not on pre-aggregated summary tables.
+
+### Grain: fixed vs. atomic
+- **Grain** = what one row represents ("one row per transaction", "one row per merchant").
+- A pre-aggregated table sits at a **fixed grain** decided at build time (e.g.
+  `agg_merchant_metrics` is one row per merchant). The detail that fed those totals is
+  summed away and **cannot be recovered** — you can't slice it by month or scheme,
+  because that detail no longer exists in the table.
+- The **atomic fact** sits at the finest grain. Every transaction keeps its full detail
+  (date, scheme, amount, fraud flag), so it can be rolled **up** to any coarser grain on
+  demand.
+
+**Core principle: you can always aggregate up from a fine grain, but never disaggregate
+down from a coarse one.** Pre-aggregated = fast but rigid; atomic fact = flexible,
+because every coarser grain is still reachable.
+
+### Why both layers still earn their place
+- **Aggregate models (in the warehouse)** = ready-to-serve answers at a fixed grain for
+  *any* warehouse consumer (SQL client, notebook, another BI tool), independent of Power
+  BI. Also a performance pattern for very large datasets.
+- **Atomic fact (in Power BI)** = flexible foundation where DAX computes metrics
+  dynamically at whatever grain the user's filters imply.
+They are two artifacts for two jobs, not duplicated work.
+
+### Loading discipline
+Import only the clean, tested mart models (the dbt `dbt_dev` schema), not the raw source
+schema and not the staging/intermediate models. No Power Query cleaning is needed —
+that work was already done upstream in dbt. ("Load", not "Transform Data".)
+
+---
+
+## 3. The Semantic Model — Relationships
+
+The **semantic model** is the set of relationships connecting fact and dimensions inside
+Power BI. A correct star schema here is what makes every downstream measure and visual
+compute correctly.
+
+### Cardinality (one-to-many)
+Each dimension relates to the fact as **one-to-many**:
+- **One** side = the dimension (one row per merchant — its grain).
+- **Many** side = the fact (that merchant appears in many transactions).
+Power BI marks the ends of the relationship line: **`1`** on the dimension end, **`*`**
+(many) on the fact end. This is the canonical star-schema relationship.
+
+### Cross-filter direction (Single, dimension → fact)
+- Filters should flow **one way**: from dimensions *down* to the fact. Selecting a
+  dimension value narrows the fact rows.
+- Set cross-filter direction to **Single**, not **Both**. Bidirectional (Both)
+  re-introduces ambiguity, can produce incorrect numbers, and hurts performance.
+
+### Verifying direction is correct
+1. **`1` / `*` markers** (definitive) — `1` on the dimension side, `*` on the fact side.
+   Filtering always flows from the `1` side to the `*` side.
+2. **Arrowhead** — points toward the fact (the direction the filter flows).
+3. **Sanity test** — "picking a dimension value narrows the transactions" should feel
+   like the natural behavior.
+
+---
+
+## 4. Dimension-to-Dimension Relationships and Ambiguous Filter Paths
+
+In a clean star, dimensions connect to the **fact**, not to each other. A
+dimension-to-dimension relationship is a warning sign — often Power BI auto-detecting a
+link from a shared column name.
+
+### Why it's a problem: ambiguous filter paths
+If a dimension can filter the fact through **two different routes** (e.g.
+`dim_bank → fct` directly, *and* `dim_bank → dim_merchant → fct` indirectly), DAX has
+more than one path to propagate a filter. This produces ambiguous or wrong results, and
+Power BI may refuse to activate one path.
+
+### Resolving it
+If the dimension already connects to the fact directly, the dim-to-dim link adds an
+ambiguous second path **without adding analytical capability** — every fact row already
+knows its bank through the fact's own key. Remove the redundant path.
+
+### Delete vs. Deactivate
+- **Delete** — removes the relationship entirely. Cleanest when the path is never wanted.
+- **Deactivate** — keeps it defined but dormant; advanced DAX can invoke it on demand via
+  `USERELATIONSHIP()`. Useful for role-playing dimensions, not for simple redundancy.
+
+### Where to fix it: model vs. source
+Whether a foreign key *belongs* in a dimension (a source/dbt question) is separate from
+whether the relationship should be **active in the Power BI model**. A redundant filter
+path can be fixed cleanly in Power BI (delete the relationship) without rebuilding the
+upstream warehouse model — a faster, reversible fix than changing dbt schema and tests.
