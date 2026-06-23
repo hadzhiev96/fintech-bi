@@ -1,0 +1,113 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 832.38958177186134,
+            "y": 654.60579160567681
+          },
+          "nodeIndex": "dbt_dev dim_bank",
+          "nodeLineageTag": "26a8195c-8c7e-4f3e-8f0d-76a95279d85f",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 431.56763634669915
+          },
+          "nodeIndex": "dbt_dev dim_card",
+          "nodeLineageTag": "ea8d2ece-c88b-4b24-a521-2136d72eb3c1",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 912.13744202383191,
+            "y": 161.09736472790451
+          },
+          "nodeIndex": "dbt_dev dim_customer",
+          "nodeLineageTag": "c83f0d23-87cc-4905-9377-ad90372de1e1",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 440.93281450361246,
+            "y": 0
+          },
+          "nodeIndex": "dbt_dev dim_date",
+          "nodeLineageTag": "96cfe21d-3e42-4529-80a4-b1ddd194d223",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 387.26031199066688,
+            "y": 843.38842904555224
+          },
+          "nodeIndex": "dbt_dev dim_merchant",
+          "nodeLineageTag": "bc867b57-b7fd-4a3f-9ff4-36146a6c61c4",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50.005582897492559,
+            "y": 130.44312986894147
+          },
+          "nodeIndex": "dbt_dev dim_scheme",
+          "nodeLineageTag": "97376dd3-c0e0-425e-b465-b3d57e68155a",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 440.20848344304625,
+            "y": 349.25098873752819
+          },
+          "nodeIndex": "dbt_dev fct_transactions",
+          "nodeLineageTag": "9b6a1863-2778-4d37-b54c-73b27e5fb76a",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

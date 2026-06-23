@@ -1,0 +1,77 @@
+table 'dbt_dev dim_card'
+	lineageTag: ea8d2ece-c88b-4b24-a521-2136d72eb3c1
+
+	column card_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 71e1b75e-2de1-4f27-a2b0-0cf71b53b356
+		summarizeBy: none
+		sourceColumn: card_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column card_type
+		dataType: string
+		lineageTag: 75cdb9c0-9992-4326-8201-b2ad94cb569f
+		summarizeBy: none
+		sourceColumn: card_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column card_network
+		dataType: string
+		lineageTag: dfeecd2b-03be-415e-a6a3-d04b8d6d893c
+		summarizeBy: none
+		sourceColumn: card_network
+
+		annotation SummarizationSetBy = Automatic
+
+	column currency
+		dataType: string
+		lineageTag: b08ff9ee-83b7-4404-87c8-941023b40a9e
+		summarizeBy: none
+		sourceColumn: currency
+
+		annotation SummarizationSetBy = Automatic
+
+	column card_status
+		dataType: string
+		lineageTag: 03573a6c-4105-449e-bd4a-de61a1e7ecff
+		summarizeBy: none
+		sourceColumn: card_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_issued
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 7e4af1c1-3daf-47f1-ba78-e610d4b73f27
+		summarizeBy: none
+		sourceColumn: date_issued
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column expiry_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 55f8c447-69c8-422e-aeca-83519ebf34d0
+		summarizeBy: none
+		sourceColumn: expiry_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition 'dbt_dev dim_card' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "fintech"),
+				    dbt_dev_dim_card = Source{[Schema="dbt_dev",Item="dim_card"]}[Data]
+				in
+				    dbt_dev_dim_card
+
+	annotation PBI_ResultType = Table
+

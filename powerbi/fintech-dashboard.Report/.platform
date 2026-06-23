@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "fintech-dashboard"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "1455b9ad-feda-47dd-8269-a96d9eceda50"
+  }
+}

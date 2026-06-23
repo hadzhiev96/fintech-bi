@@ -1,0 +1,24 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["dbt_dev fct_transactions","dbt_dev dim_merchant","dbt_dev dim_customer","dbt_dev dim_date","dbt_dev dim_scheme","dbt_dev dim_bank","dbt_dev dim_card"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table 'dbt_dev fct_transactions'
+ref table 'dbt_dev dim_merchant'
+ref table 'dbt_dev dim_customer'
+ref table 'dbt_dev dim_date'
+ref table 'dbt_dev dim_scheme'
+ref table 'dbt_dev dim_bank'
+ref table 'dbt_dev dim_card'
+
+ref cultureInfo en-US
+

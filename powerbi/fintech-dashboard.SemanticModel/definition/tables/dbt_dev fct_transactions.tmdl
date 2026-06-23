@@ -1,0 +1,155 @@
+table 'dbt_dev fct_transactions'
+	lineageTag: 9b6a1863-2778-4d37-b54c-73b27e5fb76a
+
+	column transaction_id
+		dataType: int64
+		formatString: 0
+		lineageTag: f7840cba-b283-4cc9-8c2d-afb5459ce4ef
+		summarizeBy: sum
+		sourceColumn: transaction_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_amount
+		dataType: double
+		lineageTag: 38a16c3c-916f-47b3-843f-76b94a6276f2
+		summarizeBy: sum
+		sourceColumn: transaction_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column interchange_fee
+		dataType: double
+		lineageTag: 64db2e90-3ec2-47c4-95df-b1a8e35902b2
+		summarizeBy: sum
+		sourceColumn: interchange_fee
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column scheme_fee
+		dataType: double
+		lineageTag: e684b276-91c2-4fda-8226-e262dfbdc456
+		summarizeBy: sum
+		sourceColumn: scheme_fee
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fx_rate
+		dataType: double
+		lineageTag: 4b6f4596-e8e6-433c-b80e-7e461b0bf036
+		summarizeBy: sum
+		sourceColumn: fx_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fraud_loss
+		dataType: double
+		lineageTag: 7cd12857-4479-4f95-8728-c82e57706ad1
+		summarizeBy: sum
+		sourceColumn: fraud_loss
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_chargeback
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a867c4b7-5d8c-49e2-8d59-37e6dae11d19
+		summarizeBy: none
+		sourceColumn: is_chargeback
+
+		annotation SummarizationSetBy = Automatic
+
+	column net_revenue
+		dataType: double
+		lineageTag: 471e9439-d49b-4b60-9272-4c90b3e853fd
+		summarizeBy: sum
+		sourceColumn: net_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_fraud
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: d2cffcee-8a69-417c-823e-dded8499d0f2
+		summarizeBy: none
+		sourceColumn: is_fraud
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 8550f76b-4fef-4327-a324-ee26f6b7c770
+		summarizeBy: none
+		sourceColumn: customer_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column card_key
+		dataType: int64
+		formatString: 0
+		lineageTag: fff594d8-a733-4cc7-9338-63a1d0ba025a
+		summarizeBy: none
+		sourceColumn: card_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column merchant_key
+		dataType: int64
+		formatString: 0
+		lineageTag: bb7ec4b7-96a9-4555-aace-e6bbfa141703
+		summarizeBy: none
+		sourceColumn: merchant_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column bank_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 16b9e611-97a0-4f32-8263-8f838a883859
+		summarizeBy: none
+		sourceColumn: bank_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column scheme_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 31c2364b-dc27-4d7f-9498-3f35c33cc384
+		summarizeBy: none
+		sourceColumn: scheme_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 32390530-2488-4217-8026-d108ca966a66
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'dbt_dev fct_transactions' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "fintech"),
+				    dbt_dev_fct_transactions = Source{[Schema="dbt_dev",Item="fct_transactions"]}[Data]
+				in
+				    dbt_dev_fct_transactions
+
+	annotation PBI_ResultType = Table
+

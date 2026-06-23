@@ -1,0 +1,47 @@
+table 'dbt_dev dim_bank'
+	lineageTag: 26a8195c-8c7e-4f3e-8f0d-76a95279d85f
+
+	column bank_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 097c6327-5819-4721-8bf8-70b8a6efd395
+		summarizeBy: none
+		sourceColumn: bank_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column bank_name
+		dataType: string
+		lineageTag: b317d179-0fc6-430e-87db-dd00e0d28925
+		summarizeBy: none
+		sourceColumn: bank_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: 30fb7384-0d41-4975-b5e2-8326f027f11d
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column bank_type
+		dataType: string
+		lineageTag: 19fa4cd3-bad3-4a96-b1b3-8e2b95328f68
+		summarizeBy: none
+		sourceColumn: bank_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'dbt_dev dim_bank' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "fintech"),
+				    dbt_dev_dim_bank = Source{[Schema="dbt_dev",Item="dim_bank"]}[Data]
+				in
+				    dbt_dev_dim_bank
+
+	annotation PBI_ResultType = Table
+

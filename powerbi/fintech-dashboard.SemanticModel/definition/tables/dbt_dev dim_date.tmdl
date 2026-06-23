@@ -1,0 +1,79 @@
+table 'dbt_dev dim_date'
+	lineageTag: 96cfe21d-3e42-4529-80a4-b1ddd194d223
+
+	column date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: c011ba62-d614-4ab7-9682-11d4d3fb1748
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a4957b30-0a92-4c39-bfda-82ccfc4aba11
+		summarizeBy: none
+		sourceColumn: transaction_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column transaction_day
+		dataType: int64
+		formatString: 0
+		lineageTag: 531b0eb9-38b3-456b-b547-d1953819f31a
+		summarizeBy: sum
+		sourceColumn: transaction_day
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_month
+		dataType: int64
+		formatString: 0
+		lineageTag: a6c474a4-a680-4909-9843-f6bafbb2e7a9
+		summarizeBy: sum
+		sourceColumn: transaction_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 3c3762fc-bfb4-4270-8cd4-7d03b78656e3
+		summarizeBy: sum
+		sourceColumn: transaction_quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 33626d30-4580-45eb-843f-1d8d075b34a9
+		summarizeBy: sum
+		sourceColumn: transaction_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 43216e74-8265-4d7b-8fad-4b30a2c053fc
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'dbt_dev dim_date' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "fintech"),
+				    dbt_dev_dim_date = Source{[Schema="dbt_dev",Item="dim_date"]}[Data]
+				in
+				    dbt_dev_dim_date
+
+	annotation PBI_ResultType = Table
+

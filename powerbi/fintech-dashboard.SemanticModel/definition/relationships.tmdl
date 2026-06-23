@@ -1,0 +1,24 @@
+relationship AutoDetected_9decba87-28c4-4bb5-87d1-b02bed6dd4fb
+	fromColumn: 'dbt_dev fct_transactions'.customer_key
+	toColumn: 'dbt_dev dim_customer'.customer_key
+
+relationship AutoDetected_1fa67174-f1f1-4d43-8b2e-9ff4e1e82d6c
+	fromColumn: 'dbt_dev fct_transactions'.card_key
+	toColumn: 'dbt_dev dim_card'.card_key
+
+relationship AutoDetected_0a5467c3-981a-4bb9-bba3-5bd5f8c44244
+	fromColumn: 'dbt_dev fct_transactions'.merchant_key
+	toColumn: 'dbt_dev dim_merchant'.merchant_key
+
+relationship AutoDetected_9a34cc46-b0ab-4fed-8c87-1290776916d0
+	fromColumn: 'dbt_dev fct_transactions'.bank_key
+	toColumn: 'dbt_dev dim_bank'.bank_key
+
+relationship AutoDetected_59035e54-dc6e-4df1-93e0-3d46ca8baa66
+	fromColumn: 'dbt_dev fct_transactions'.scheme_key
+	toColumn: 'dbt_dev dim_scheme'.scheme_key
+
+relationship AutoDetected_bf2fe4e9-1db1-452c-88a3-f8a4ea80face
+	fromColumn: 'dbt_dev fct_transactions'.date_key
+	toColumn: 'dbt_dev dim_date'.date_key
+

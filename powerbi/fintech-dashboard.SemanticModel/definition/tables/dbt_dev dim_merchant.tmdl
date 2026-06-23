@@ -1,0 +1,64 @@
+table 'dbt_dev dim_merchant'
+	lineageTag: bc867b57-b7fd-4a3f-9ff4-36146a6c61c4
+
+	column merchant_key
+		dataType: int64
+		formatString: 0
+		lineageTag: cc2ee7f8-78c5-4a18-a681-0b01854a8956
+		summarizeBy: none
+		sourceColumn: merchant_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column merchant_name
+		dataType: string
+		lineageTag: a7907b45-454f-43fc-afee-8e40e7a6ed2f
+		summarizeBy: none
+		sourceColumn: merchant_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_category
+		dataType: string
+		lineageTag: 1bcd439f-373e-4d4e-ad4c-970b1c7d202b
+		summarizeBy: none
+		sourceColumn: business_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 56332b74-da95-4f44-ae1f-484cdab2a5d6
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column country
+		dataType: string
+		lineageTag: 178b93be-3d2e-44f6-ad93-d0e4867b8a6a
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	column bank_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 7220fcc2-7077-494f-98ef-f9711eac8865
+		summarizeBy: none
+		sourceColumn: bank_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'dbt_dev dim_merchant' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "fintech"),
+				    dbt_dev_dim_merchant = Source{[Schema="dbt_dev",Item="dim_merchant"]}[Data]
+				in
+				    dbt_dev_dim_merchant
+
+	annotation PBI_ResultType = Table
+
