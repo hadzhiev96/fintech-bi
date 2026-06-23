@@ -4,3 +4,5 @@ fintect_dbt/logs/
 fintect_dbt/target/
 fintect_dbt/dbt_packages/
 Courses to take.docx
+# Power BI PBIP local cache and settings
+**/.pbi/
