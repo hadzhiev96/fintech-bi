@@ -1186,3 +1186,38 @@ Whether a foreign key *belongs* in a dimension (a source/dbt question) is separa
 whether the relationship should be **active in the Power BI model**. A redundant filter
 path can be fixed cleanly in Power BI (delete the relationship) without rebuilding the
 upstream warehouse model — a faster, reversible fix than changing dbt schema and tests.
+
+
+
+## Session 14 — DAX Measures & Time Intelligence
+
+### DAX evaluation context
+- A measure aggregates under whatever filter context is active (slicer, visual row, card). Same measure, different value per context.
+- Measures aggregating fact columns live on the fact table; measures counting a dimension live on that dimension.
+
+### Core measure patterns
+- Simple aggregation: SUM(table[column])
+- Conditional count (COUNTIF equivalent): COUNTROWS(FILTER(table, condition))
+- Safe ratio: DIVIDE(numerator, denominator) — returns BLANK on divide-by-zero
+- DIVIDE third argument = alternate result when denominator is zero/blank
+
+### Time intelligence
+- PREVIOUSMONTH(dateColumn) returns a table of dates shifted back one month; it needs a real date column, not a month label.
+- PREVIOUSMONTH cannot stand alone — wrap it in CALCULATE to modify the filter context of a measure.
+- CALCULATE(expression, filter) evaluates the expression under a modified filter context.
+- Time intelligence requires the date table to be marked "Mark as date table" on its date column.
+
+### Guarding a percentage-change measure
+- Percentage change (current − previous) / previous is only meaningful when the denominator is a positive baseline.
+- A negative or near-zero denominator flips the sign and explodes the magnitude, producing meaningless figures.
+- Guard with IF(previous > 0, DIVIDE(...), BLANK()). Use BLANK() in DAX, not NULL.
+
+### dim_date year-month label
+- A sortable year-month text label ("2023-08") belongs in dbt (property of a date, reusable across consumers), not in a single BI tool.
+- "2023-08" sorts chronologically under alphabetical sort; "August 2023" does not.
+- PostgreSQL: CONCAT(year, '-', LPAD(month::text, 2, '0')) — LPAD pads on the left; its pad argument must be a string ('0'), not an integer.
+
+### Commands
+- dbt run -s dim_date   (-s / --select runs only the named model)
+- dbt test -s dim_date  (run tests for one model)
+- cat ~/.dbt/profiles.yml  (profiles live in the home dir, not the project)

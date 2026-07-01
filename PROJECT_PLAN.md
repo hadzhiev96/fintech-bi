@@ -80,7 +80,7 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 ✅ dim_merchant.sql (retains bank_key; merchant→bank relationship left inactive in BI)
 ✅ dim_customer.sql
 ✅ dim_card.sql
-✅ dim_date.sql
+✅ dim_date.sql (+ transaction_year_month label column for BI time grouping)
 ✅ dim_bank.sql
 ✅ dim_scheme.sql
 ✅ agg_merchant_metrics.sql (aggregated merchant summary, sources net_revenue from fct)
@@ -108,7 +108,7 @@ pre-aggregated summary endpoints, not stepping-stone models.)
 ✅ Net revenue defined once in fct_transactions (sourced by both agg models)
 ✅ Interchange revenue defined (interchange_fee, aggregated in agg_merchant_metrics)
 ✅ Chargeback rate defined (is_chargeback flag + chargeback_pct in agg_merchant_metrics)
-🔄 Fraud rate (is_fraud flag added to fct; rate % not yet surfaced in an agg model)
+🔄 Fraud rate (is_fraud flag on fct; surfaced as a DAX measure in Power BI — not yet in an agg model)
 
 ---
 
@@ -118,14 +118,15 @@ Goal: Build one solid semantic model and executive dashboard.
 ### Setup
 ✅ Power BI Desktop installed
 ✅ Connected to Postgres in Import mode (chose Import over DirectQuery — static data, full DAX surface)
-⏳ Tabular Editor 3 installed
-⏳ DAX Studio installed
-⏳ PBIP format enabled
+✅ PBIP format enabled
+⏳ Tabular Editor 3 installed (deferred, non-blocking)
+⏳ DAX Studio installed (deferred, non-blocking)
 
 ### Semantic Model
 ✅ Star schema imported from dbt marts (7 tables from dbt_dev: fct + 6 dims)
 ✅ Relationships configured correctly (6x one-to-many dim→fact, single cross-filter direction)
 ✅ Removed ambiguous dim_bank→dim_merchant auto-detected relationship
+✅ Marked dim_date as date table (on transaction_date) — required for time intelligence
 ⏳ Row-level security implemented (CFO vs merchant view)
 
 ### Report Pages
@@ -143,14 +144,17 @@ Goal: Build one solid semantic model and executive dashboard.
     ⏳ Chargeback trend
 
 ### DAX Measures
-⏳ Net Revenue = interchange - scheme fees - fraud losses
-⏳ Fraud Rate = fraud transactions / total transactions
-⏳ Chargeback Rate = chargebacks / total transactions
-⏳ MoM Revenue Change
+✅ NetRevenue = SUM(net_revenue) — dbt-defined metric, summed under filter context
+✅ FraudRate = fraud transactions / total transactions
+✅ ChargebackRate = chargebacks / total transactions
+✅ TotalInterchange = SUM(interchange_fee)
+✅ ActiveCards = count of dim_card where card_status = 'active'
+✅ MoMRevenue (absolute) = CALCULATE([NetRevenue], PREVIOUSMONTH(dim_date[transaction_date]))
+✅ MoMRevenueChange% = guarded pct change (BLANK when prior month ≤ 0)
 
 ### Version Control
-⏳ Power BI project in PBIP format
-⏳ Committed to GitHub
+✅ Power BI project in PBIP format
+✅ Committed to GitHub
 
 ---
 
@@ -213,7 +217,8 @@ Goal: Make the project hireable.
 ✅ Session 11 — Metrics layer, CTEs & import/logic/final house style, linting (SQLFluff), git recovery
 ✅ Session 12 — Documentation (model/column descriptions, dbt docs site, lineage review)
 ✅ Session 13 — Power BI: Import vs DirectQuery, atomic grain, semantic model & relationships
-⏳ Sessions 14+ — DAX measures (start net revenue); staging tests & lint cleanup (deferred)
+✅ Session 14 — DAX measures (net revenue, fraud/chargeback rate, interchange, active cards, MoM revenue + guarded pct); dim_date year-month label; date table marking
+⏳ Sessions 15+ — Report pages (executive KPI, merchant, risk); RLS; staging tests & lint cleanup (deferred)
 
 ---
 
@@ -226,4 +231,4 @@ Goal: Make the project hireable.
 🔄 Associate Data Engineer in SQL (ongoing)
 
 ## Coursera
-⏳ DeepLearning.AI Data Engineering Certificate (start after Phase 2)
+⏳ DeepLearning.AI Data Engineering Certificate (start after Phase 2)</document_content>
