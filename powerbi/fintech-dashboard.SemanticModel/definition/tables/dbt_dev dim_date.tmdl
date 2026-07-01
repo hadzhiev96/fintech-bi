@@ -1,5 +1,6 @@
 table 'dbt_dev dim_date'
 	lineageTag: 96cfe21d-3e42-4529-80a4-b1ddd194d223
+	dataCategory: Time
 
 	column date_key
 		dataType: int64
@@ -12,6 +13,7 @@ table 'dbt_dev dim_date'
 
 	column transaction_date
 		dataType: dateTime
+		isKey
 		formatString: Long Date
 		lineageTag: a4957b30-0a92-4c39-bfda-82ccfc4aba11
 		summarizeBy: none
@@ -63,6 +65,14 @@ table 'dbt_dev dim_date'
 		lineageTag: 43216e74-8265-4d7b-8fad-4b30a2c053fc
 		summarizeBy: none
 		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	column transaction_year_month
+		dataType: string
+		lineageTag: 8d51e5a5-8586-41f9-bab4-8cf5c1ee38e5
+		summarizeBy: none
+		sourceColumn: transaction_year_month
 
 		annotation SummarizationSetBy = Automatic
 

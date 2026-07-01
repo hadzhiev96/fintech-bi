@@ -1,6 +1,10 @@
 table 'dbt_dev dim_card'
 	lineageTag: ea8d2ece-c88b-4b24-a521-2136d72eb3c1
 
+	measure ActiveCards = COUNTROWS(FILTER('dbt_dev dim_card', [card_status] = "active"))
+		formatString: 0
+		lineageTag: 091bcab0-7454-4857-ad39-001d740fb761
+
 	column card_key
 		dataType: int64
 		formatString: 0
