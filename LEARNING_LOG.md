@@ -1221,3 +1221,36 @@ upstream warehouse model — a faster, reversible fix than changing dbt schema a
 - dbt run -s dim_date   (-s / --select runs only the named model)
 - dbt test -s dim_date  (run tests for one model)
 - cat ~/.dbt/profiles.yml  (profiles live in the home dir, not the project)
+
+
+## Session 15 — Report Page Construction (Power BI)
+
+### Match visual type to question shape
+The core principle of the session. Every visual answers a *shape* of question:
+- **Headline value → card.** A single number sized for a 5-second glance. Recognition, not reading.
+- **Compare discrete categories → bar.** Bars share a common baseline, so the eye compares *length* — the one visual comparison humans do accurately. Reliable even for close values.
+- **Change over an ordered sequence (time) → line.** A line connects consecutive points; the connection *is* the message. The eye follows slope (rising/falling/spiky) as a continuous trajectory. Time is continuous and ordered, so connecting matches the data's nature.
+
+### Bar vs pie for composition
+Both show parts of a whole, but humans read *length* well and *angle/area* poorly. Two close pie slices look identical; two close bars don't. Default to bars. Pie earns its place only for 2–3 slices where the message is "one dominates."
+
+### Format on the measure, not the visual
+Set number format (currency symbol, %, decimals) on the measure itself, in the Data pane / ribbon — not per-visual. The format then travels with the measure everywhere it appears. Define-once, authoritative — the DAX analogue of defining a metric once in dbt. Currency *symbol* must match the data's denomination (£, not the default $).
+
+### Grouping by name can silently merge distinct entities
+A visual groups by whatever field sits on its axis. Put a *name* on the axis and any rows sharing that name collapse into one — even when they're distinct keys. Always ask: **"does grouping by name hide something?"** Two shapes of this:
+- Accidental collision — two unrelated entities happen to share a name (e.g. two "Ortega Inc" with different keys). Collapsing is always wrong.
+- Legitimate variant — same entity split by an attribute (e.g. Visa Europe vs Visa Global). Collapsing is a *choice* that depends on the question (network-level vs region-split).
+The robust fix is upstream: a unique display name in the dimension (dbt), not a per-report patch.
+
+### Text YYYY-MM sorts chronologically because it's zero-padded
+A `YYYY-MM` string column sorts alphabetically, and zero-padding makes alphabetical order equal chronological order ("2023-02" < "2023-11" < "2024-01"). Non-padded ("2024-3") or worded ("March 2024") formats break the time axis. The label-format choice in dbt is what makes the BI time axis sort correctly.
+
+### Rate vs raw count answer different questions
+Fraud *rate* (fraud ÷ transactions) = proportional risk — which segment is riskiest. Fraud *count* = absolute volume — where the most cases land. A high-volume segment can top the count while having a low rate. Choose per the question the page is asking.
+
+### A uniform / flat chart is itself a finding
+When a breakdown comes out near-uniform (e.g. fraud rate ~2% across every scheme), that *rules a factor out* — "this dimension doesn't discriminate risk; look elsewhere." Ruling something out is legitimate analytical output, not a failed visual.
+
+### Top N filtering
+A ranked "top 10" list is produced by a visual-level filter: Filter type → Top N → show top 10 by a chosen measure. The visual then auto-sorts descending on that ranking measure.

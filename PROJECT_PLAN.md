@@ -130,18 +130,20 @@ Goal: Build one solid semantic model and executive dashboard.
 ⏳ Row-level security implemented (CFO vs merchant view)
 
 ### Report Pages
-⏳ Executive KPI page
-    ⏳ Net revenue
-    ⏳ Total interchange
-    ⏳ Fraud rate
-    ⏳ Chargeback rate
-    ⏳ Active cards
-⏳ Merchant analysis page
-    ⏳ Top 10 merchants by revenue
-    ⏳ Revenue by merchant category
-⏳ Risk page
-    ⏳ Fraud by scheme
-    ⏳ Chargeback trend
+(All three pages built and functionally wired; visual formatting/layout deferred to a
+single end-of-Phase-3 formatting pass — see Deferred Work below.)
+✅ Executive KPI page — 5 cards grouped money / risk / scale
+    ✅ Net revenue
+    ✅ Total interchange
+    ✅ Fraud rate
+    ✅ Chargeback rate
+    ✅ Active cards
+✅ Merchant analysis page
+    ✅ Top 10 merchants by revenue (horizontal bar, Top N filter ranked by NetRevenue)
+    ✅ Revenue by merchant category (horizontal bar, composition)
+✅ Risk page
+    ✅ Fraud by scheme (horizontal bar, FraudRate — currently groups by scheme_name; see Deferred Work)
+    ✅ Chargeback trend (line, x-axis transaction_year_month sorted ascending)
 
 ### DAX Measures
 ✅ NetRevenue = SUM(net_revenue) — dbt-defined metric, summed under filter context
@@ -151,6 +153,21 @@ Goal: Build one solid semantic model and executive dashboard.
 ✅ ActiveCards = count of dim_card where card_status = 'active'
 ✅ MoMRevenue (absolute) = CALCULATE([NetRevenue], PREVIOUSMONTH(dim_date[transaction_date]))
 ✅ MoMRevenueChange% = guarded pct change (BLANK when prior month ≤ 0)
+✅ Display formats set on the measures themselves (not per-visual): £ currency on
+   money measures, % on rate measures, whole number on ActiveCards
+
+### Deferred Work (batch at end of Phase 3)
+⏳ Report formatting pass (all pages at once, for consistency): card positioning/grouping
+   via proximity, colours, fonts, alignment. Executive card strip scheme already worked out —
+   width 211, Net Revenue at X=58/Y=63, 2-2-1 grouping, within-group gap 20px, between-group
+   gap 70px, all cards Y=63.
+⏳ Data regeneration pass (single generate_data.py rework + reload + dbt run/test + PBI refresh + re-validate):
+    ⏳ Calibrate loss magnitudes — bound fraud/chargeback loss relative to transaction amount
+       (root cause of negative net-revenue months and spiky chargeback-trend line)
+    ⏳ Nudge card_status weights so ~70–80% of cards are active (cosmetic)
+    ⏳ Add disambiguated display-name column on dim_merchant (e.g. "Ortega Inc (0473)")
+    ⏳ Scheme grouping decision — network-level (collapse Visa/Mastercard region variants by name)
+       vs region-split (show all 5 keys, e.g. "Visa (Europe)" / "Visa (Global)")
 
 ### Version Control
 ✅ Power BI project in PBIP format
@@ -218,7 +235,8 @@ Goal: Make the project hireable.
 ✅ Session 12 — Documentation (model/column descriptions, dbt docs site, lineage review)
 ✅ Session 13 — Power BI: Import vs DirectQuery, atomic grain, semantic model & relationships
 ✅ Session 14 — DAX measures (net revenue, fraud/chargeback rate, interchange, active cards, MoM revenue + guarded pct); dim_date year-month label; date table marking
-⏳ Sessions 15+ — Report pages (executive KPI, merchant, risk); RLS; staging tests & lint cleanup (deferred)
+✅ Session 15 — Report pages built (executive KPI cards; merchant analysis bars; risk trend + breakdown); visual-type-to-question-shape mapping; format-on-measure; grouping-by-name collapse risk surfaced (Ortega merchants, scheme region variants)
+⏳ Sessions 16+ — Report formatting pass; RLS; end-of-Phase-3 data regeneration; staging tests & lint cleanup (deferred)
 
 ---
 
@@ -231,4 +249,4 @@ Goal: Make the project hireable.
 🔄 Associate Data Engineer in SQL (ongoing)
 
 ## Coursera
-⏳ DeepLearning.AI Data Engineering Certificate (start after Phase 2)</document_content>
+⏳ DeepLearning.AI Data Engineering Certificate (start after Phase 2)
