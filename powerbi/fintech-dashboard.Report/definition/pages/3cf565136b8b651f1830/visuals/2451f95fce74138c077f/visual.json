@@ -1,0 +1,106 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
+  "name": "2451f95fce74138c077f",
+  "position": {
+    "x": 92,
+    "y": 14,
+    "z": 0,
+    "height": 375,
+    "width": 947,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dbt_dev dim_date"
+                    }
+                  },
+                  "Property": "transaction_year_month"
+                }
+              },
+              "queryRef": "dbt_dev dim_date.transaction_year_month",
+              "nativeQueryRef": "transaction_year_month",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dbt_dev fct_transactions"
+                    }
+                  },
+                  "Property": "Chargeback_Rate"
+                }
+              },
+              "queryRef": "dbt_dev fct_transactions.Chargeback_Rate",
+              "nativeQueryRef": "Chargeback_Rate"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dbt_dev dim_date"
+                  }
+                },
+                "Property": "transaction_year_month"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "ff3276b08821e85d22d0",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev dim_date"
+              }
+            },
+            "Property": "transaction_year_month"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "dd871d9ffc56b9eb8bbe",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev fct_transactions"
+              }
+            },
+            "Property": "Chargeback_Rate"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
+  "name": "2a493a0db4b33f2734a2",
+  "position": {
+    "x": 269.42249240121583,
+    "y": 63.221884498480243,
+    "z": 1000,
+    "height": 188.69300911854103,
+    "width": 178.96656534954408,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dbt_dev fct_transactions"
+                    }
+                  },
+                  "Property": "TotalInterchange"
+                }
+              },
+              "queryRef": "dbt_dev fct_transactions.TotalInterchange",
+              "nativeQueryRef": "TotalInterchange"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dbt_dev fct_transactions"
+                  }
+                },
+                "Property": "TotalInterchange"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "5D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

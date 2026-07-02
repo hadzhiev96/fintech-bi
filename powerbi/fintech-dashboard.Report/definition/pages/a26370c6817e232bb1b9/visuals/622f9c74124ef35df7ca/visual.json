@@ -1,0 +1,75 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
+  "name": "622f9c74124ef35df7ca",
+  "position": {
+    "x": 863.70820668693011,
+    "y": 162.43161094224925,
+    "z": 1000,
+    "height": 436.71732522796356,
+    "width": 345.28875379939211,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dbt_dev dim_merchant"
+                    }
+                  },
+                  "Property": "business_category"
+                }
+              },
+              "queryRef": "dbt_dev dim_merchant.business_category",
+              "nativeQueryRef": "Count of business_category",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dbt_dev fct_transactions"
+                    }
+                  },
+                  "Property": "NetRevenue"
+                }
+              },
+              "queryRef": "dbt_dev fct_transactions.NetRevenue",
+              "nativeQueryRef": "NetRevenue"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dbt_dev fct_transactions"
+                  }
+                },
+                "Property": "NetRevenue"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

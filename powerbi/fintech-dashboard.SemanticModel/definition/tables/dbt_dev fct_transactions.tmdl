@@ -2,10 +2,10 @@ table 'dbt_dev fct_transactions'
 	lineageTag: 9b6a1863-2778-4d37-b54c-73b27e5fb76a
 
 	measure NetRevenue = SUM('dbt_dev fct_transactions'[net_revenue])
-		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
 		lineageTag: 62c3f9ee-230b-4364-8a33-b2d163493b72
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
 
 	measure Fraud_Rate = DIVIDE(COUNTROWS(FILTER('dbt_dev fct_transactions', [is_fraud] = TRUE)), COUNTROWS('dbt_dev fct_transactions'))
 		formatString: 0.00%;-0.00%;0.00%
@@ -16,16 +16,16 @@ table 'dbt_dev fct_transactions'
 		lineageTag: 90e3ffe5-9404-4d15-ba70-655bff497538
 
 	measure TotalInterchange = SUM('dbt_dev fct_transactions'[interchange_fee])
-		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
 		lineageTag: b89c12b9-b196-426e-bf21-24bd87a680c1
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
 
 	measure MoMRevenue = CALCULATE([NetRevenue],PREVIOUSMONTH('dbt_dev dim_date'[transaction_date]))
-		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
 		lineageTag: 2cd3bb3e-c394-44bb-a8e0-2577f429a6e0
 
-		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
 
 	measure MoMRevenueChange% = IF([MoMRevenue] > 0,DIVIDE([NetRevenue] - [MoMRevenue], [MoMRevenue]), BLANK())
 		lineageTag: 646d62d0-d80b-4402-a14d-cacba7d2fe14
