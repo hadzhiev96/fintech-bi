@@ -12,6 +12,8 @@ annotation PBI_QueryOrder = ["dbt_dev fct_transactions","dbt_dev dim_merchant","
 
 annotation PBI_ProTooling = ["DevMode"]
 
+annotation __TEdtr = 1
+
 ref table 'dbt_dev fct_transactions'
 ref table 'dbt_dev dim_merchant'
 ref table 'dbt_dev dim_customer'

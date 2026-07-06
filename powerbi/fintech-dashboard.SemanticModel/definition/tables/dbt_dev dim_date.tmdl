@@ -2,6 +2,33 @@ table 'dbt_dev dim_date'
 	lineageTag: 96cfe21d-3e42-4529-80a4-b1ddd194d223
 	dataCategory: Time
 
+	measure MoMRevenue = CALCULATE([NetRevenue],PREVIOUSMONTH('dbt_dev dim_date'[transaction_date]))
+		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
+		lineageTag: 2cd3bb3e-c394-44bb-a8e0-2577f429a6e0
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
+
+	measure MoMRevenueChange% = IF([MoMRevenue] > 0,DIVIDE([NetRevenue] - [MoMRevenue], [MoMRevenue]), BLANK())
+		lineageTag: 646d62d0-d80b-4402-a14d-cacba7d2fe14
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure MTD_Revenue = TOTALMTD([NetRevenue], 'dbt_dev dim_date'[transaction_date])
+		lineageTag: 351e7eff-7594-410e-b441-02376920cc85
+
+	measure QTD_Revenue = TOTALQTD([NetRevenue], 'dbt_dev dim_date'[transaction_date])
+		lineageTag: 5a0e581a-f67f-408c-beff-97afbc48c6a7
+
+	measure PY_Revenue = CALCULATE([NetRevenue],SAMEPERIODLASTYEAR('dbt_dev dim_date'[transaction_date]))
+		lineageTag: 9b01eecf-7f48-4409-aa11-714412fbdce7
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure YoY_Change% = IF([PY_Revenue]>0,DIVIDE([NetRevenue] - [PY_Revenue],[PY_Revenue]),BLANK())
+		lineageTag: f45d0824-0637-4941-9608-5268b4646411
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
 	column date_key
 		dataType: int64
 		formatString: 0

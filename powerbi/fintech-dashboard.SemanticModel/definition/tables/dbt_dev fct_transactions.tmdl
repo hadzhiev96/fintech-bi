@@ -21,17 +21,6 @@ table 'dbt_dev fct_transactions'
 
 		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
 
-	measure MoMRevenue = CALCULATE([NetRevenue],PREVIOUSMONTH('dbt_dev dim_date'[transaction_date]))
-		formatString: "£"#,0.00;-"£"#,0.00;"£"#,0.00
-		lineageTag: 2cd3bb3e-c394-44bb-a8e0-2577f429a6e0
-
-		annotation PBI_FormatHint = {"currencyCulture":"en-GB"}
-
-	measure MoMRevenueChange% = IF([MoMRevenue] > 0,DIVIDE([NetRevenue] - [MoMRevenue], [MoMRevenue]), BLANK())
-		lineageTag: 646d62d0-d80b-4402-a14d-cacba7d2fe14
-
-		annotation PBI_FormatHint = {"isGeneralNumber":true}
-
 	column transaction_id
 		dataType: int64
 		formatString: 0
