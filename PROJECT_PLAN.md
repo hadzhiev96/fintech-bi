@@ -119,8 +119,8 @@ Goal: Build one solid semantic model and executive dashboard.
 ✅ Power BI Desktop installed
 ✅ Connected to Postgres in Import mode (chose Import over DirectQuery — static data, full DAX surface)
 ✅ PBIP format enabled
-⏳ Tabular Editor 3 installed (deferred, non-blocking)
-⏳ DAX Studio installed (deferred, non-blocking)
+✅ Tabular Editor 2 installed (free/OSS — plan said "3" but the free community build is 2; sufficient for authoring) — connected under External Tools
+✅ DAX Studio installed — connected under External Tools (ready for profiling/debugging; not yet needed)
 
 ### Semantic Model
 ✅ Star schema imported from dbt marts (7 tables from dbt_dev: fct + 6 dims)
@@ -144,6 +144,9 @@ single end-of-Phase-3 formatting pass — see Deferred Work below.)
 ✅ Risk page
     ✅ Fraud by scheme (horizontal bar, FraudRate — currently groups by scheme_name; see Deferred Work)
     ✅ Chargeback trend (line, x-axis transaction_year_month sorted ascending)
+🔄 Time-intelligence page (MTD / QTD / YoY) — measures built and verified via visuals
+   (MTD-by-day saw-tooth line; QTD-by-month saw-tooth line); dedicated page assembly +
+   formatting rolls into the end-of-Phase-3 formatting pass
 
 ### DAX Measures
 ✅ NetRevenue = SUM(net_revenue) — dbt-defined metric, summed under filter context
@@ -153,6 +156,13 @@ single end-of-Phase-3 formatting pass — see Deferred Work below.)
 ✅ ActiveCards = count of dim_card where card_status = 'active'
 ✅ MoMRevenue (absolute) = CALCULATE([NetRevenue], PREVIOUSMONTH(dim_date[transaction_date]))
 ✅ MoMRevenueChange% = guarded pct change (BLANK when prior month ≤ 0)
+✅ MTD_Revenue = TOTALMTD([NetRevenue], 'dbt_dev dim_date'[transaction_date]) — month-to-date accumulation
+✅ QTD_Revenue = TOTALQTD([NetRevenue], 'dbt_dev dim_date'[transaction_date]) — quarter-to-date accumulation
+✅ PY_Revenue = CALCULATE([NetRevenue], SAMEPERIODLASTYEAR('dbt_dev dim_date'[transaction_date])) — same period last year baseline
+✅ YoY_Change% = IF([PY_Revenue] > 0, DIVIDE([NetRevenue] - [PY_Revenue], [PY_Revenue]), BLANK()) — guarded YoY pct
+   (Absolute YoY_Change deliberately not built — % is the executive headline; add later if a visual needs it)
+✅ All time-intelligence measures authored in Tabular Editor 2 and re-homed onto dbt_dev dim_date
+   (MoMRevenue + MoMRevenueChange% moved from fct_transactions; MTD/QTD/PY/YoY authored there directly)
 ✅ Display formats set on the measures themselves (not per-visual): £ currency on
    money measures, % on rate measures, whole number on ActiveCards
 
@@ -168,6 +178,8 @@ single end-of-Phase-3 formatting pass — see Deferred Work below.)
     ⏳ Add disambiguated display-name column on dim_merchant (e.g. "Ortega Inc (0473)")
     ⏳ Scheme grouping decision — network-level (collapse Visa/Mastercard region variants by name)
        vs region-split (show all 5 keys, e.g. "Visa (Europe)" / "Visa (Global)")
+⏳ Cleanup: verify/remove the empty _Measures table if it was created via Enter Data
+   (decided against it in favour of homing time-intelligence measures on dbt_dev dim_date)
 
 ### Version Control
 ✅ Power BI project in PBIP format
@@ -236,7 +248,8 @@ Goal: Make the project hireable.
 ✅ Session 13 — Power BI: Import vs DirectQuery, atomic grain, semantic model & relationships
 ✅ Session 14 — DAX measures (net revenue, fraud/chargeback rate, interchange, active cards, MoM revenue + guarded pct); dim_date year-month label; date table marking
 ✅ Session 15 — Report pages built (executive KPI cards; merchant analysis bars; risk trend + breakdown); visual-type-to-question-shape mapping; format-on-measure; grouping-by-name collapse risk surfaced (Ortega merchants, scheme region variants)
-⏳ Sessions 16+ — Report formatting pass; RLS; end-of-Phase-3 data regeneration; staging tests & lint cleanup (deferred)
+✅ Session 16 — DAX Studio + Tabular Editor 2 installed; time-intelligence measures (MTD, QTD, PY_Revenue, YoY_Change%) authored in Tabular Editor & homed on dim_date; measure-vs-column resolution & cosmetic home table; to-date-equals-period-total-at-own-grain; SAMEPERIODLASTYEAR vs PREVIOUSYEAR; guarded YoY%
+⏳ Sessions 17+ — Report formatting pass (incl. time-intelligence page assembly); RLS; end-of-Phase-3 data regeneration; staging tests & lint cleanup (deferred)
 
 ---
 

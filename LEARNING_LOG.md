@@ -1254,3 +1254,48 @@ When a breakdown comes out near-uniform (e.g. fraud rate ~2% across every scheme
 
 ### Top N filtering
 A ranked "top 10" list is produced by a visual-level filter: Filter type → Top N → show top 10 by a chosen measure. The visual then auto-sorts descending on that ranking measure.
+
+## Session 16 — Time Intelligence: To-Date Measures, YoY, and DAX Resolution
+
+### How DAX resolves references — measures vs columns
+- **Columns** are referenced *table-qualified*: `Table[column]` — because column names can repeat across tables, so the table prefix is the address. Table names containing a space must be single-quoted: `'dbt_dev dim_date'[transaction_date]`.
+- **Measures** are referenced *bare*: `[NetRevenue]` — no table prefix, because a measure name must be **globally unique across the whole model**. There is exactly one measure of that name, so it resolves unambiguously.
+- Consequence: a measure's **home table is cosmetic** — a filing label for humans in the Fields pane, not part of how DAX finds or computes it. Moving a measure between tables never changes its result.
+
+### Where measures should live (organizational convention, since it's cosmetic)
+- Plain aggregation of one fact column (NetRevenue, TotalInterchange) → **fact table**.
+- Count/filter of a dimension (ActiveCards on dim_card) → **that dimension**.
+- Time-intelligence (MTD, QTD, MoM, YoY) → **date table** (or a dedicated measures-only table), so the time family lives together and is findable.
+
+### A measure is a recipe, not a stored value
+`[NetRevenue]` = "SUM(net_revenue) under whatever filter context is currently active." It returns a different number per context (card, row, slicer). So the question is never "which NetRevenue" but "NetRevenue *under which filter context*". **CALCULATE** is the tool that modifies that context *before* the inner measure evaluates.
+
+### To-date measures equal the plain period total at their own grain
+- `TOTALMTD([m], dates)` accumulates from the 1st of the month to the current date-in-context; `TOTALQTD` from the start of the quarter.
+- At **month grain**, MTD = the full monthly total. At **quarter grain**, QTD = the full quarterly total. So at the period's own grain, a to-date measure is *redundant* with a plain SUM.
+- A to-date measure only reveals its accumulating (saw-tooth) behaviour at a grain **finer than the period**: MTD by day, QTD by month — climbing within the period, resetting at the boundary.
+- Design corollary: to make a to-date measure earn its place, put a finer grain on the axis (a line chart shows the saw-tooth). For per-period totals, display plain NetRevenue, not the to-date measure.
+
+### Time intelligence needs the marked date table
+Every time-intelligence function pivots on the date column of the table marked "as date table" (done in Session 14). Without it, these functions error or misbehave.
+
+### CALCULATE + time-shift is the general comparison pattern
+Unlike MTD/QTD (all-in-one TOTAL* functions), period *comparisons* use `CALCULATE([measure], <time-shift filter>)`:
+- MoM: `CALCULATE([NetRevenue], PREVIOUSMONTH(dates))`
+- Prior year: `CALCULATE([NetRevenue], SAMEPERIODLASTYEAR(dates))`
+
+### SAMEPERIODLASTYEAR vs PREVIOUSYEAR (the YoY trap)
+- **SAMEPERIODLASTYEAR(dates)** = the same period shifted back one year, *preserving the current grain* (March 2024 → March 2023; Q1 2024 → Q1 2023). Correct for a same-period YoY.
+- **PREVIOUSYEAR(dates)** = the *entire* previous year (all 12 months), regardless of current grain — returns the same full-year number on every month row. Wrong for same-month YoY.
+- Nested time shifts **compound**: `PREVIOUSYEAR(PREVIOUSMONTH(...))` drifts a month off (March → Feb → prior-Feb). Trace nested time functions **inside-out** to see what they actually return.
+
+### Guarding a year-over-year percentage
+- `YoY_Change% = IF([PY_Revenue] > 0, DIVIDE([NetRevenue] - [PY_Revenue], [PY_Revenue]), BLANK())`
+- Same guard as MoM%: (current − prior)/prior is only meaningful on a **positive baseline**; a zero/negative/blank prior explodes or sign-flips the percentage.
+- Use `DIVIDE` (returns BLANK on divide-by-zero) rather than the `/` operator.
+- A blank YoY% for a non-positive prior period is a **deliberate, explainable design choice**, not a gap — worth being able to articulate.
+
+### Tabular Editor vs DAX Studio
+- **Tabular Editor 2** (free/OSS) = *author & organize* the model: write measures, re-home them (drag in the tree), tree view of the semantic model. Changes are **not live** — must **Ctrl+S** to save back to Power BI.
+- **DAX Studio** = *profile & debug*: run raw DAX queries, read Server Timings (storage engine vs formula engine), evaluate a measure in isolation. Read-only — inspect, don't edit.
+- Autocomplete: **Ctrl+Space** forces the suggestion list; `[` triggers measures/columns, `'` triggers tables. TE2's autocomplete is less eager than Desktop's formula bar — Desktop is better for *discovering* a function name.
