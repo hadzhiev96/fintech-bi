@@ -1,0 +1,7 @@
+role Spain
+	modelPermission: read
+
+	tablePermission 'dbt_dev dim_merchant' = 'dbt_dev dim_merchant'[country] = "Spain"
+
+	annotation PBI_Id = 450bd0c885004b428fd983b7bb45a766
+

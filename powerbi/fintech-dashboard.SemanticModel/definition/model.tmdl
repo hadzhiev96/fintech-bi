@@ -22,5 +22,12 @@ ref table 'dbt_dev dim_scheme'
 ref table 'dbt_dev dim_bank'
 ref table 'dbt_dev dim_card'
 
+ref role Bulgaria
+ref role France
+ref role Germany
+ref role Italy
+ref role Netherlands
+ref role Spain
+
 ref cultureInfo en-US
 

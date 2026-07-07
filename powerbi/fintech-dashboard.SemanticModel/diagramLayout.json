@@ -16,7 +16,7 @@
           "nodeIndex": "dbt_dev dim_bank",
           "nodeLineageTag": "26a8195c-8c7e-4f3e-8f0d-76a95279d85f",
           "size": {
-            "height": 176,
+            "height": 234,
             "width": 234
           },
           "zIndex": 1
