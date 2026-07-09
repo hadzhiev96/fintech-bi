@@ -8,7 +8,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "b51cc2f516febcca7295",
+        "name": "5321ad15499796a7198f",
         "field": {
           "Column": {
             "Expression": {
@@ -16,21 +16,60 @@
                 "Entity": "dbt_dev dim_merchant"
               }
             },
-            "Property": "merchant_name"
+            "Property": "merchant_display_name"
           }
         },
         "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "d",
+              "Entity": "dbt_dev dim_merchant",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "d"
+                          }
+                        },
+                        "Property": "merchant_display_name"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'Bailey-Porter (79)'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
         "howCreated": "Drillthrough"
       }
     ]
   },
   "pageBinding": {
-    "name": "22bdda93f82c23ffdd84",
+    "name": "b52b439a965a261c2bcd",
     "type": "Drillthrough",
     "parameters": [
       {
-        "name": "12e009fbb3933c90c8b3",
-        "boundFilter": "b51cc2f516febcca7295",
+        "name": "92308a28b4626499e82b",
+        "boundFilter": "5321ad15499796a7198f",
         "asAggregation": false,
         "qnaSingleSelectRequired": false,
         "fieldExpr": {
@@ -40,7 +79,7 @@
                 "Entity": "dbt_dev dim_merchant"
               }
             },
-            "Property": "merchant_name"
+            "Property": "merchant_display_name"
           }
         }
       }

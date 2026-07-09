@@ -51,6 +51,14 @@ table 'dbt_dev dim_merchant'
 
 		annotation SummarizationSetBy = Automatic
 
+	column merchant_display_name
+		dataType: string
+		lineageTag: 8022db42-879d-4869-830f-4bfc03264253
+		summarizeBy: none
+		sourceColumn: merchant_display_name
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'dbt_dev dim_merchant' = m
 		mode: import
 		source =

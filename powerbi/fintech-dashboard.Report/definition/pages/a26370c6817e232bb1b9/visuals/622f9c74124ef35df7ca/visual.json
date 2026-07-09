@@ -71,5 +71,37 @@
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "994b941c439948b510b1",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev dim_merchant"
+              }
+            },
+            "Property": "business_category"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "ae0602c91c6f2c258f6c",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev fct_transactions"
+              }
+            },
+            "Property": "NetRevenue"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

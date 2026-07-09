@@ -23,11 +23,11 @@
                       "Entity": "dbt_dev dim_merchant"
                     }
                   },
-                  "Property": "merchant_name"
+                  "Property": "merchant_display_name"
                 }
               },
-              "queryRef": "dbt_dev dim_merchant.merchant_name",
-              "nativeQueryRef": "merchant_name",
+              "queryRef": "dbt_dev dim_merchant.merchant_display_name",
+              "nativeQueryRef": "merchant_display_name",
               "active": true
             }
           ]
@@ -173,7 +173,8 @@
               }
             }
           ]
-        }
+        },
+        "howCreated": "User"
       },
       {
         "name": "e64c6228851e5c1fc3f1",
@@ -188,6 +189,20 @@
           }
         },
         "type": "Advanced"
+      },
+      {
+        "name": "a74236cce5487aa54498",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev dim_merchant"
+              }
+            },
+            "Property": "merchant_display_name"
+          }
+        },
+        "type": "Categorical"
       }
     ]
   }
