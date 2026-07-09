@@ -23,11 +23,11 @@
                       "Entity": "dbt_dev dim_scheme"
                     }
                   },
-                  "Property": "scheme_name"
+                  "Property": "scheme_display_name"
                 }
               },
-              "queryRef": "dbt_dev dim_scheme.scheme_name",
-              "nativeQueryRef": "Count of scheme_name",
+              "queryRef": "dbt_dev dim_scheme.scheme_display_name",
+              "nativeQueryRef": "scheme_display_name",
               "active": true
             }
           ]
@@ -75,20 +75,6 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "507bfdf8b11b7e8ac19e",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dbt_dev dim_scheme"
-              }
-            },
-            "Property": "scheme_name"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
         "name": "0c8bbbe5819f9743f04d",
         "field": {
           "Measure": {
@@ -101,6 +87,20 @@
           }
         },
         "type": "Advanced"
+      },
+      {
+        "name": "a82689f4970c9ec00771",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev dim_scheme"
+              }
+            },
+            "Property": "scheme_display_name"
+          }
+        },
+        "type": "Categorical"
       }
     ]
   }

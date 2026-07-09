@@ -26,6 +26,14 @@ table 'dbt_dev dim_scheme'
 
 		annotation SummarizationSetBy = Automatic
 
+	column scheme_display_name
+		dataType: string
+		lineageTag: 5013b444-df0d-440f-bbdd-f9e11a808d1c
+		summarizeBy: none
+		sourceColumn: scheme_display_name
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'dbt_dev dim_scheme' = m
 		mode: import
 		source =
