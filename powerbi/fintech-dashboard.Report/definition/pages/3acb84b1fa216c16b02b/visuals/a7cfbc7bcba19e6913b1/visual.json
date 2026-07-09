@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "41e69887e2572f30f168",
+  "name": "a7cfbc7bcba19e6913b1",
   "position": {
-    "x": 58.358662613981764,
-    "y": 63.221884498480243,
-    "z": 0,
-    "height": 197,
-    "width": 211.06382978723406,
-    "tabOrder": 0
+    "x": 265.49611203311764,
+    "y": 291.60634257619006,
+    "z": 2,
+    "height": 188.69300911854103,
+    "width": 178.96656534954408,
+    "tabOrder": 2
   },
   "visual": {
     "visualType": "cardVisual",
@@ -23,11 +23,11 @@
                       "Entity": "dbt_dev fct_transactions"
                     }
                   },
-                  "Property": "NetRevenue"
+                  "Property": "TotalInterchange"
                 }
               },
-              "queryRef": "dbt_dev fct_transactions.NetRevenue",
-              "nativeQueryRef": "NetRevenue"
+              "queryRef": "dbt_dev fct_transactions.TotalInterchange",
+              "nativeQueryRef": "TotalInterchange"
             }
           ]
         }
@@ -42,7 +42,7 @@
                     "Entity": "dbt_dev fct_transactions"
                   }
                 },
-                "Property": "NetRevenue"
+                "Property": "TotalInterchange"
               }
             },
             "direction": "Descending"
@@ -51,24 +51,21 @@
         "isDefaultSort": true
       }
     },
-    "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "a57fd988262da8428a68",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dbt_dev fct_transactions"
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "5D"
+                }
               }
-            },
-            "Property": "NetRevenue"
+            }
           }
-        },
-        "type": "Advanced"
-      }
-    ]
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

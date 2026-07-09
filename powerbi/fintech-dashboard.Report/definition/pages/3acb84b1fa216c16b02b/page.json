@@ -1,0 +1,49 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "3acb84b1fa216c16b02b",
+  "displayName": "Merchant Detail",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "b51cc2f516febcca7295",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev dim_merchant"
+              }
+            },
+            "Property": "merchant_name"
+          }
+        },
+        "type": "Categorical",
+        "howCreated": "Drillthrough"
+      }
+    ]
+  },
+  "pageBinding": {
+    "name": "22bdda93f82c23ffdd84",
+    "type": "Drillthrough",
+    "parameters": [
+      {
+        "name": "12e009fbb3933c90c8b3",
+        "boundFilter": "b51cc2f516febcca7295",
+        "asAggregation": false,
+        "qnaSingleSelectRequired": false,
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev dim_merchant"
+              }
+            },
+            "Property": "merchant_name"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "41e69887e2572f30f168",
+  "name": "815441ea7e2da7a89781",
   "position": {
-    "x": 58.358662613981764,
-    "y": 63.221884498480243,
-    "z": 0,
-    "height": 197,
-    "width": 211.06382978723406,
-    "tabOrder": 0
+    "x": 1000.8152609692881,
+    "y": 312.03187449108378,
+    "z": 5,
+    "height": 146.86930091185411,
+    "width": 152.70516717325228,
+    "tabOrder": 5
   },
   "visual": {
     "visualType": "cardVisual",
@@ -20,14 +20,14 @@
                 "Measure": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "dbt_dev fct_transactions"
+                      "Entity": "dbt_dev dim_card"
                     }
                   },
-                  "Property": "NetRevenue"
+                  "Property": "ActiveCards"
                 }
               },
-              "queryRef": "dbt_dev fct_transactions.NetRevenue",
-              "nativeQueryRef": "NetRevenue"
+              "queryRef": "dbt_dev dim_card.ActiveCards",
+              "nativeQueryRef": "ActiveCards"
             }
           ]
         }
@@ -39,10 +39,10 @@
               "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "dbt_dev fct_transactions"
+                    "Entity": "dbt_dev dim_card"
                   }
                 },
-                "Property": "NetRevenue"
+                "Property": "ActiveCards"
               }
             },
             "direction": "Descending"
@@ -52,23 +52,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "a57fd988262da8428a68",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dbt_dev fct_transactions"
-              }
-            },
-            "Property": "NetRevenue"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

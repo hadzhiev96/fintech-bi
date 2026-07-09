@@ -4,5 +4,10 @@
   "displayName": "Merchant Analysis",
   "displayOption": "FitToPage",
   "height": 720,
-  "width": 1280
+  "width": 1280,
+  "pageBinding": {
+    "name": "64bc3bdc93456666c52c",
+    "type": "Default",
+    "parameters": []
+  }
 }

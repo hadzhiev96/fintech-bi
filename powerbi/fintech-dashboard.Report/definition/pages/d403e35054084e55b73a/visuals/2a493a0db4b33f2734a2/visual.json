@@ -67,5 +67,23 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "20bdacd10af18c45f164",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dbt_dev fct_transactions"
+              }
+            },
+            "Property": "TotalInterchange"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

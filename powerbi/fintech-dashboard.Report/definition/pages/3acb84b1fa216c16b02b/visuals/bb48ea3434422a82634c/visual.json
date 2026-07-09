@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "41e69887e2572f30f168",
+  "name": "bb48ea3434422a82634c",
   "position": {
-    "x": 58.358662613981764,
-    "y": 63.221884498480243,
-    "z": 0,
-    "height": 197,
-    "width": 211.06382978723406,
-    "tabOrder": 0
+    "x": 726.52954668357381,
+    "y": 294.52427570688911,
+    "z": 4,
+    "height": 170.21276595744681,
+    "width": 184.80243161094225,
+    "tabOrder": 4
   },
   "visual": {
     "visualType": "cardVisual",
@@ -23,11 +23,11 @@
                       "Entity": "dbt_dev fct_transactions"
                     }
                   },
-                  "Property": "NetRevenue"
+                  "Property": "Chargeback_Rate"
                 }
               },
-              "queryRef": "dbt_dev fct_transactions.NetRevenue",
-              "nativeQueryRef": "NetRevenue"
+              "queryRef": "dbt_dev fct_transactions.Chargeback_Rate",
+              "nativeQueryRef": "Chargeback_Rate"
             }
           ]
         }
@@ -42,7 +42,7 @@
                     "Entity": "dbt_dev fct_transactions"
                   }
                 },
-                "Property": "NetRevenue"
+                "Property": "Chargeback_Rate"
               }
             },
             "direction": "Descending"
@@ -52,23 +52,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "a57fd988262da8428a68",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dbt_dev fct_transactions"
-              }
-            },
-            "Property": "NetRevenue"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "41e69887e2572f30f168",
+  "name": "384aa77a32281b46637c",
   "position": {
-    "x": 58.358662613981764,
-    "y": 63.221884498480243,
-    "z": 0,
-    "height": 197,
-    "width": 211.06382978723406,
-    "tabOrder": 0
+    "x": 45.807770961145195,
+    "y": 304.29447852760762,
+    "z": 6,
+    "height": 154.43762781186095,
+    "width": 198.93660531697341,
+    "tabOrder": 6
   },
   "visual": {
     "visualType": "cardVisual",
@@ -56,7 +56,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "a57fd988262da8428a68",
+        "name": "9f8e0be9b01883043461",
         "field": {
           "Measure": {
             "Expression": {

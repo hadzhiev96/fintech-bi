@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
-  "name": "41e69887e2572f30f168",
+  "name": "84cb14301bc9b7378da5",
   "position": {
-    "x": 58.358662613981764,
-    "y": 63.221884498480243,
-    "z": 0,
-    "height": 197,
-    "width": 211.06382978723406,
-    "tabOrder": 0
+    "x": 545.61769258023037,
+    "y": 291.60634257619006,
+    "z": 3,
+    "height": 177.02127659574469,
+    "width": 180.91185410334347,
+    "tabOrder": 3
   },
   "visual": {
     "visualType": "cardVisual",
@@ -23,11 +23,11 @@
                       "Entity": "dbt_dev fct_transactions"
                     }
                   },
-                  "Property": "NetRevenue"
+                  "Property": "Fraud_Rate"
                 }
               },
-              "queryRef": "dbt_dev fct_transactions.NetRevenue",
-              "nativeQueryRef": "NetRevenue"
+              "queryRef": "dbt_dev fct_transactions.Fraud_Rate",
+              "nativeQueryRef": "Fraud_Rate"
             }
           ]
         }
@@ -42,7 +42,7 @@
                     "Entity": "dbt_dev fct_transactions"
                   }
                 },
-                "Property": "NetRevenue"
+                "Property": "Fraud_Rate"
               }
             },
             "direction": "Descending"
@@ -56,7 +56,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "a57fd988262da8428a68",
+        "name": "0e8259bfd566ab16bb0a",
         "field": {
           "Measure": {
             "Expression": {
@@ -64,7 +64,7 @@
                 "Entity": "dbt_dev fct_transactions"
               }
             },
-            "Property": "NetRevenue"
+            "Property": "Fraud_Rate"
           }
         },
         "type": "Advanced"
