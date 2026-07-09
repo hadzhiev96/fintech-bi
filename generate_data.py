@@ -261,7 +261,7 @@ def generate_dim_card(n=700):
                 random.choice(card_types),
                 random.choice(card_networks),
                 random.choice(currencies),
-                random.choice(card_statuses),
+                random.choices(card_statuses, weights=[70, 10, 10, 10], k=1)[0],
                 date_issued,
                 expiry_date,
                 random.choice(customer_keys),
@@ -304,7 +304,7 @@ def generate_fact_transactions(n=50000):
 
         is_fraud = random.random() < 0.02
         fraud_loss = (
-            round(float(amount) * random.uniform(0.5, 1.0), 2) if is_fraud else 0.00
+            round(float(amount) * random.uniform(0.05, 0.20), 2) if is_fraud else 0.00
         )
 
         is_chargeback = is_fraud and random.random() < 0.60
@@ -341,13 +341,13 @@ def generate_fact_transactions(n=50000):
     print("fact_transactions populated!")
 
 
-cursor.execute("DROP TABLE IF EXISTS fact_transactions;")
-cursor.execute("DROP TABLE IF EXISTS dim_card;")
-cursor.execute("DROP TABLE IF EXISTS dim_merchant;")
-cursor.execute("DROP TABLE IF EXISTS dim_customer;")
-cursor.execute("DROP TABLE IF EXISTS dim_scheme;")
-cursor.execute("DROP TABLE IF EXISTS dim_bank;")
-cursor.execute("DROP TABLE IF EXISTS dim_date;")
+cursor.execute("DROP TABLE IF EXISTS fact_transactions CASCADE;")
+cursor.execute("DROP TABLE IF EXISTS dim_card CASCADE;")
+cursor.execute("DROP TABLE IF EXISTS dim_merchant CASCADE;")
+cursor.execute("DROP TABLE IF EXISTS dim_customer CASCADE;")
+cursor.execute("DROP TABLE IF EXISTS dim_scheme CASCADE;")
+cursor.execute("DROP TABLE IF EXISTS dim_bank CASCADE;")
+cursor.execute("DROP TABLE IF EXISTS dim_date CASCADE;")
 
 create_tables()
 generate_dim_date(date(2023, 1, 1), date(2024, 12, 31))
