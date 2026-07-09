@@ -127,7 +127,14 @@ Goal: Build one solid semantic model and executive dashboard.
 ✅ Relationships configured correctly (6x one-to-many dim→fact, single cross-filter direction)
 ✅ Removed ambiguous dim_bank→dim_merchant auto-detected relationship
 ✅ Marked dim_date as date table (on transaction_date) — required for time intelligence
-⏳ Row-level security implemented (CFO vs merchant view)
+✅ Row-level security — 6 static regional roles (France, Germany, Italy, Bulgaria,
+   Netherlands, Spain) filtering on dim_merchant.merchant_country. Rejected the original
+   "CFO vs merchant" framing (doesn't map to a real org); no "sees everything" role needed
+   — unassigned users see everything by default. Static (not dynamic/USERNAME()-based) —
+   sufficient for a locally-demoed portfolio with no real user accounts. Verified via
+   "View as roles" for all 6, cross-checked against expected order of magnitude
+   (Bulgaria = 12/100 merchants → ~12% revenue, confirmed £50K/£396K), and confirmed
+   filter propagates across every report page, not just one visual.
 
 ### Report Pages
 (All three pages built and functionally wired; visual formatting/layout deferred to a
@@ -144,9 +151,13 @@ single end-of-Phase-3 formatting pass — see Deferred Work below.)
 ✅ Risk page
     ✅ Fraud by scheme (horizontal bar, FraudRate — currently groups by scheme_name; see Deferred Work)
     ✅ Chargeback trend (line, x-axis transaction_year_month sorted ascending)
-🔄 Time-intelligence page (MTD / QTD / YoY) — measures built and verified via visuals
-   (MTD-by-day saw-tooth line; QTD-by-month saw-tooth line); dedicated page assembly +
-   formatting rolls into the end-of-Phase-3 formatting pass
+✅ Time-intelligence measures (MTD / QTD / YoY) — built, homed on dim_date, verified via
+   visuals (MTD-by-day saw-tooth line; QTD-by-month saw-tooth line); dedicated page layout
+   rolls into the deferred formatting pass (Phase 5)
+✅ Per-merchant drillthrough — Top 10 merchants chart → Merchant Detail page, filtered on
+   merchant_display_name (axis field and drillthrough field matched); cards re-shown at
+   merchant grain (NetRevenue, TotalInterchange, FraudRate, ChargebackRate); re-verified
+   after merchant_display_name swap
 
 ### DAX Measures
 ✅ NetRevenue = SUM(net_revenue) — dbt-defined metric, summed under filter context
@@ -166,24 +177,36 @@ single end-of-Phase-3 formatting pass — see Deferred Work below.)
 ✅ Display formats set on the measures themselves (not per-visual): £ currency on
    money measures, % on rate measures, whole number on ActiveCards
 
-### Deferred Work (batch at end of Phase 3)
-⏳ Report formatting pass (all pages at once, for consistency): card positioning/grouping
+### Data Regeneration Pass — ✅ COMPLETE (Sessions 18-19)
+✅ Fraud loss magnitude recalibrated: random.uniform(0.5, 1.0) → random.uniform(0.05, 0.20)
+   of transaction amount. Verified via DBeaver MoM query: 0 negative months across all 24
+   (was several, e.g. Aug 2023 −£8,708), monthly revenue now a stable £69K–£87K band
+   (was £15K–£40K erratic), largest MoM swing ~£13K (was ~£49K).
+✅ Card status weighting: uniform random.choice → weighted random.choices([70,10,10,10])
+   for ~70% active cards (was ~25%, 193/700).
+✅ Merchant name disambiguation: merchant_display_name column added on dim_merchant.sql
+   (name + surrogate key, e.g. "Ortega Inc (47)") — fixes accidental name collisions.
+   Applied to Top 10 chart axis + drillthrough field.
+✅ Scheme region-split: scheme_display_name column added on dim_scheme.sql (name + region,
+   e.g. "Visa (Europe)") — Risk page fraud-by-scheme chart now shows all 5 scheme keys
+   instead of collapsing to 3 by name.
+✅ Two incidental bugs fixed during the pass: DROP TABLE statements needed CASCADE (dbt
+   staging views depended on raw tables); dim_card expiry_date crashed on leap-day
+   date_issued (Feb 29) — fixed via timedelta instead of manual year/month/day reconstruction.
+
+### Deferred to Phase 5 (Portfolio Polish) — moved out of Phase 3, non-blocking
+⏳ Report formatting/UX pass (all pages at once, for consistency): card positioning/grouping
    via proximity, colours, fonts, alignment. Executive card strip scheme already worked out —
    width 211, Net Revenue at X=58/Y=63, 2-2-1 grouping, within-group gap 20px, between-group
-   gap 70px, all cards Y=63.
-⏳ Data regeneration pass (single generate_data.py rework + reload + dbt run/test + PBI refresh + re-validate):
-    ⏳ Calibrate loss magnitudes — bound fraud/chargeback loss relative to transaction amount
-       (root cause of negative net-revenue months and spiky chargeback-trend line)
-    ⏳ Nudge card_status weights so ~70–80% of cards are active (cosmetic)
-    ⏳ Add disambiguated display-name column on dim_merchant (e.g. "Ortega Inc (0473)")
-    ⏳ Scheme grouping decision — network-level (collapse Visa/Mastercard region variants by name)
-       vs region-split (show all 5 keys, e.g. "Visa (Europe)" / "Visa (Global)")
+   gap 70px, all cards Y=63. Time-intelligence page layout also rolls into this pass.
 ⏳ Cleanup: verify/remove the empty _Measures table if it was created via Enter Data
    (decided against it in favour of homing time-intelligence measures on dbt_dev dim_date)
 
 ### Version Control
 ✅ Power BI project in PBIP format
 ✅ Committed to GitHub
+
+**Phase 3 — Complete** (formatting/UX pass deliberately deferred to Phase 5, non-blocking)
 
 ---
 
@@ -220,10 +243,14 @@ Goal: Add orchestration and cloud warehouse.
 Goal: Make the project hireable.
 
 ### Documentation
-⏳ GitHub README tells the full story
-⏳ Architecture Decision Record written
+✅ GitHub README tells the full story (architecture diagram, tech stack, decisions
+   highlights, repo structure, run instructions)
+✅ Architecture Decision Record written (docs/DECISIONS.md — Import vs DirectQuery,
+   surrogate keys/name-collision bugs, RLS regional framing, fraud-loss bug hunt,
+   time-intelligence home-table reasoning)
 ⏳ Metric catalog documented
 ⏳ Data lineage diagram created (lineage graph screenshot captured — ready to embed)
+⏳ Report formatting/UX pass (deferred from Phase 3 — see Phase 3 note)
 
 ### Presentation
 ⏳ Loom walkthrough recorded (10-15 mins)
@@ -249,7 +276,9 @@ Goal: Make the project hireable.
 ✅ Session 14 — DAX measures (net revenue, fraud/chargeback rate, interchange, active cards, MoM revenue + guarded pct); dim_date year-month label; date table marking
 ✅ Session 15 — Report pages built (executive KPI cards; merchant analysis bars; risk trend + breakdown); visual-type-to-question-shape mapping; format-on-measure; grouping-by-name collapse risk surfaced (Ortega merchants, scheme region variants)
 ✅ Session 16 — DAX Studio + Tabular Editor 2 installed; time-intelligence measures (MTD, QTD, PY_Revenue, YoY_Change%) authored in Tabular Editor & homed on dim_date; measure-vs-column resolution & cosmetic home table; to-date-equals-period-total-at-own-grain; SAMEPERIODLASTYEAR vs PREVIOUSYEAR; guarded YoY%
-⏳ Sessions 17+ — Report formatting pass (incl. time-intelligence page assembly); RLS; end-of-Phase-3 data regeneration; staging tests & lint cleanup (deferred)
+✅ Session 17 — Row-level security (6 static regional roles, rejected "CFO vs merchant" framing for a real org-structure framing); per-merchant drillthrough (axis/drillthrough field matching); RLS verification method (predict order of magnitude, then confirm + check propagation across pages)
+✅ Session 18-19 — Full data regeneration pass: fraud loss + card status weighting fixed in generate_data.py; merchant + scheme name-collision fixes pushed to dbt (display-name columns); root-caused the negative-net-revenue bug (interchange ~2% vs fraud loss 50-100% of txn value); CASCADE/leap-day bugs fixed along the way; README.md + docs/DECISIONS.md written
+⏳ Phase 3 formatting/UX pass — deferred to Phase 5 (non-blocking); Phase 4 (Airflow, Snowflake) starts next
 
 ---
 

@@ -1299,3 +1299,41 @@ Unlike MTD/QTD (all-in-one TOTAL* functions), period *comparisons* use `CALCULAT
 - **Tabular Editor 2** (free/OSS) = *author & organize* the model: write measures, re-home them (drag in the tree), tree view of the semantic model. Changes are **not live** — must **Ctrl+S** to save back to Power BI.
 - **DAX Studio** = *profile & debug*: run raw DAX queries, read Server Timings (storage engine vs formula engine), evaluate a measure in isolation. Read-only — inspect, don't edit.
 - Autocomplete: **Ctrl+Space** forces the suggestion list; `[` triggers measures/columns, `'` triggers tables. TE2's autocomplete is less eager than Desktop's formula bar — Desktop is better for *discovering* a function name.
+
+## Session 17 — Row-Level Security & Drillthrough
+
+### RLS mechanics
+A role carries a DAX filter on one table. Assigning a user to a role applies that filter
+to every visual in the report — silently, everywhere the filtered table's data flows
+through relationships. Filter propagates dim→fact the same way normal slicers do.
+
+### Unassigned = unrestricted
+RLS only narrows. A user assigned to zero roles sees everything — there's no need to
+build a "sees everything" role; that's just the default state of no restriction.
+
+### Static vs dynamic RLS
+Static: hardcoded filter per role (e.g. `country = "Bulgaria"`) — one role per segment.
+Dynamic: filter driven by `USERNAME()` + a user-mapping table — one role serves everyone,
+filtered by identity. Dynamic is the production pattern but needs real user accounts to
+mean anything; static is fully testable locally via "View as roles" and is the right
+choice when there's no real auth behind the report.
+
+### Verify RLS with a prediction, not just a look
+Predict the rough expected value first (e.g. Bulgaria = 12/100 merchants → ~12% of
+revenue), then compare the actual number against that bound. A close match is real
+evidence the filter is both applying and propagating correctly — not just "a number
+changed." Also check propagation across every page, not just one visual.
+
+### RLS filter column must represent what it claims to
+A regional RLS role needs a column that means "where the business happened" — e.g.
+`dim_merchant.merchant_country`. A column that merely correlates with geography but
+isn't geography (e.g. `dim_scheme.region`, which describes the card network's region
+and cuts across every country) will build working *mechanics* around a meaningless
+filter — worse than no RLS, because it doesn't correspond to any real access boundary.
+
+### Drillthrough
+A hidden target page + a field in its "drillthrough" well. Right-clicking a data point
+on a source visual passes that row's context to the target page, filtering it
+automatically. The drillthrough field and the source visual's axis field don't need to
+be identical, but must belong to the same table for the relationship to resolve
+correctly — Power BI passes the whole selected row's context, not just one field.
